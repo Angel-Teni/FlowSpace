@@ -1,11 +1,28 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* brand colors */
+  --color-seasalt: #f9f9f9;
+  --color-moonstone: #58a4b0;
+  --color-space-cadet: #171738;
+  --color-african-violet: #b07bac;
+  --color-white: #ffffff;
+
+  /* light theme (default) */
+  --bg-main: var(--color-seasalt);
+  --bg-surface: var(--color-white);
+  --text-main: #1e2130;
+  --text-muted: #5b6070;
+  --accent: var(--color-african-violet);
+  --accent-soft: #f2e6f6;
+  --nav-bg: var(--color-seasalt);
+
+  /* shared tokens */
+  --shadow-soft: 0 18px 40px rgba(10, 16, 40, 0.08);
+  --hero-circle: #e3f0f3;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -13,56 +30,103 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* dark theme overrides when we set data-theme="dark" on <html> */
+html[data-theme="dark"] {
+  --bg-main: #15172b;
+  --bg-surface: #1f2440;
+  --text-main: #f3f4ff;
+  --text-muted: #a7add8;
+  --accent: var(--color-african-violet);
+  --accent-soft: #30224e;
+  --nav-bg: #171738;
+  --hero-circle: #262857;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.6);
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--bg-main);
+  color: var(--text-main);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* links */
+a {
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
 }
 
+/* base button style (can be overridden in components) */
 button {
-  border-radius: 8px;
+  border-radius: 999px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  padding: 0.6em 1.4em;
+  font-size: 0.95rem;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--accent-soft);
+  color: var(--text-main);
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: box-shadow 0.2s ease, transform 0.1s ease,
+    background-color 0.2s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ========== Layout helpers matching your Figma ========== */
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background:
+    radial-gradient(circle at top right, var(--hero-circle), transparent 60%),
+    var(--bg-main);
+}
+
+/* main card for hero / content */
+.flow-card {
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-soft);
+  border-radius: 28px;
+  padding: 3rem 3.5rem;
+}
+
+/* theme toggle pill in the top nav */
+.theme-toggle {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.theme-toggle-pill {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
 }
