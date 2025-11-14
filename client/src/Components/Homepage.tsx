@@ -1,4 +1,5 @@
 import { FlowTimer } from "./FlowTimer";
+import { QuickQuiz } from "./QuickQuiz";
 
 type Theme = "light" | "dark";
 
@@ -16,8 +17,7 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
       style={{
         minHeight: "100vh",
         background: isDark
-          ? // darker, more night-time gradient
-            "radial-gradient(circle at top left, rgba(88,164,176,0.05), transparent 55%), radial-gradient(circle at bottom right, rgba(176,123,172,0.20), #15172b)"
+          ? "radial-gradient(circle at top left, rgba(88,164,176,0.05), transparent 55%), radial-gradient(circle at bottom right, rgba(176,123,172,0.20), #15172b)"
           : "radial-gradient(circle at top left, rgba(88,164,176,0.14), transparent 55%), radial-gradient(circle at bottom right, rgba(176,123,172,0.18), transparent 55%)",
       }}
     >
@@ -218,7 +218,7 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
         </section>
       </main>
 
-      {/* feature row + embedded timer preview */}
+      {/* feature row + embedded timer + quiz */}
       <section
         style={{
           maxWidth: "1040px",
@@ -257,12 +257,12 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
             borderRadius: "1.5rem",
             padding: "1.5rem",
             backgroundColor: isDark
-              ? "rgba(15,17,38,0.95)" // deep navy in dark mode
+              ? "rgba(15,17,38,0.95)"
               : "rgba(255,255,255,0.9)",
             boxShadow: isDark
               ? "0 16px 40px rgba(0,0,0,0.55)"
               : "0 16px 40px rgba(15,23,42,0.16)",
-            color: "var(--text-main)", // ensure text inside is readable
+            color: "var(--text-main)",
           }}
         >
           <h3 style={{ marginTop: 0, marginBottom: "0.5rem" }}>
@@ -279,6 +279,24 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
             easing back into focus.
           </p>
           <FlowTimer theme={theme} />
+        </div>
+
+        {/* 💡 Quick Quiz card – right under the timer */}
+        <div
+          style={{
+            borderRadius: "1.5rem",
+            padding: "1.5rem",
+            marginTop: "2rem",
+            backgroundColor: isDark
+              ? "rgba(15,17,38,0.95)"
+              : "rgba(255,255,255,0.9)",
+            boxShadow: isDark
+              ? "0 16px 40px rgba(0,0,0,0.55)"
+              : "0 16px 40px rgba(15,23,42,0.16)",
+            color: "var(--text-main)",
+          }}
+        >
+          <QuickQuiz theme={theme} />
         </div>
       </section>
     </div>
