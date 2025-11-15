@@ -9,6 +9,8 @@
     "allowSyntheticDefaultImports": true,
     "verbatimModuleSyntax": false,
     "strict": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "types": ["node"]          // 👈 add this line
+  },
+  "include": ["src"]           // 👈 and add this block
 }
