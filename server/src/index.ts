@@ -1,8 +1,13 @@
 // server/src/index.ts
 import "dotenv/config";
+
+// @ts-ignore
 import express, { Request, Response } from "express";
+// @ts-ignore
 import cors from "cors";
+// @ts-ignore
 import OpenAI from "openai";
+
 declare const process: {
   env: {
     [key: string]: string | undefined;
