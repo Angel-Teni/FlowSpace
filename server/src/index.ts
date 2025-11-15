@@ -7,6 +7,10 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 // @ts-ignore
 import OpenAI from "openai";
+// @ts-ignore
+import multer from "multer";
+// @ts-ignore
+import pdfParse from "pdf-parse";
 
 declare const process: {
   env: {
@@ -20,32 +24,35 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
+const upload = multer({ storage: multer.memoryStorage() });
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// health check
-app.get("/", (_req: Request, res: Response) => {
-  res.send("FlowSpace API running ✨");
-});
+// shared quiz types
+type Difficulty = "chill" | "normal" | "spicy";
+type QuizType = "short_answer" | "multiple_choice" | "mixed";
 
-// -------------------------------
-// Quick Quiz route (chat.completions version)
-// -------------------------------
-app.post("/api/quiz", async (req: Request, res: Response) => {
-  try {
-    const { text, difficulty } = req.body as {
-      text?: string;
-      difficulty?: "chill" | "normal" | "spicy";
-    };
+type QuizQuestion = {
+  q: string;
+  a: string;
+};
 
-    if (!text || !text.trim()) {
-      return res.status(400).json({ error: "Text is required" });
-    }
+// ---------------------------------
+// helper: generate quiz from text
+// ---------------------------------
+async function generateQuizFromText(params: {
+  text: string;
+  difficulty: Difficulty;
+  quizType: QuizType;
+}): Promise<QuizQuestion[]> {
+  const { text, difficulty, quizType } = params;
 
-    const safeDifficulty = difficulty ?? "normal";
+  const safeDifficulty = difficulty ?? "normal";
+  const safeQuizType = quizType ?? "short_answer";
 
-    const userPrompt = `
+  const userPrompt = `
 You are a gentle, no-shame study companion for burnt-out students.
 
 Given the student's notes below, create 3–5 short practice questions.
@@ -55,9 +62,14 @@ Difficulty:
 - "normal" = moderate
 - "spicy" = a bit more challenging, but still kind
 
+Quiz type:
+- "short_answer" = open-ended questions where the student writes a short answer.
+- "multiple_choice" = questions with clear options; include the options in the question text and make the answer the correct option.
+- "mixed" = a mix of short-answer and multiple-choice styles.
+
 Return ONLY valid JSON in this exact shape:
 [
-  { "q": "question text", "a": "short answer" },
+  { "q": "question text", "a": "short answer or correct option" },
   ...
 ]
 
@@ -65,52 +77,143 @@ Notes:
 ${text}
 
 Difficulty: ${safeDifficulty}
+Quiz type: ${safeQuizType}
 `;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      temperature: 0.7,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You write kind, bite-sized quiz questions and always respond with valid JSON only.",
-        },
-        {
-          role: "user",
-          content: userPrompt,
-        },
-      ],
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    temperature: 0.7,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You write kind, bite-sized quiz questions and always respond with valid JSON only.",
+      },
+      {
+        role: "user",
+        content: userPrompt,
+      },
+    ],
+  });
+
+  const content = completion.choices[0]?.message?.content;
+
+  if (!content) {
+    throw new Error("Empty response from OpenAI");
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(content);
+  } catch (e) {
+    console.error("JSON parse error:", e, "raw content:", content);
+    throw new Error("Could not parse quiz JSON from OpenAI");
+  }
+
+  if (!Array.isArray(parsed)) {
+    throw new Error("Quiz result is not an array of questions");
+  }
+
+  return parsed as QuizQuestion[];
+}
+
+// health check
+app.get("/", (_req: Request, res: Response) => {
+  res.send("FlowSpace API running ✨");
+});
+
+// -------------------------------
+// Quick Quiz route (notes-based)
+// -------------------------------
+app.post("/api/quiz", async (req: Request, res: Response) => {
+  try {
+    const { text, difficulty, quizType } = req.body as {
+      text?: string;
+      difficulty?: Difficulty;
+      quizType?: QuizType;
+    };
+
+    if (!text || !text.trim()) {
+      return res.status(400).json({ error: "Text is required" });
+    }
+
+    const safeDiff: Difficulty = difficulty ?? "normal";
+    const safeType: QuizType = quizType ?? "short_answer";
+
+    const questions = await generateQuizFromText({
+      text,
+      difficulty: safeDiff,
+      quizType: safeType,
     });
 
-    const content = completion.choices[0]?.message?.content;
-
-    if (!content) {
-      return res.status(500).json({ error: "Empty response from OpenAI" });
-    }
-
-    let parsed;
-    try {
-      parsed = JSON.parse(content);
-    } catch (e) {
-      console.error("JSON parse error:", e, "raw content:", content);
-      return res
-        .status(500)
-        .json({ error: "Could not parse quiz JSON from OpenAI" });
-    }
-
-    if (!Array.isArray(parsed)) {
-      return res
-        .status(500)
-        .json({ error: "Quiz result is not an array of questions" });
-    }
-
-    res.json(parsed);
+    res.json(questions);
   } catch (err) {
     console.error("Error in /api/quiz:", err);
-    res.status(500).json({ error: "Failed to generate quiz" });
+    const msg =
+      err instanceof Error ? err.message : "Failed to generate quiz";
+    res.status(500).json({ error: msg });
   }
 });
+
+// -------------------------------
+// Quick Quiz route (PDF-based)
+// -------------------------------
+app.post(
+  "/api/quiz-from-pdf",
+  upload.single("file"),
+  async (req: Request, res: Response) => {
+    try {
+      const file = (req as any).file as { buffer: Buffer } | undefined;
+
+      const { difficulty, quizType } = req.body as {
+        difficulty?: Difficulty;
+        quizType?: QuizType;
+      };
+
+      if (!file) {
+        return res.status(400).json({ error: "No PDF file uploaded." });
+      }
+
+      if (!difficulty) {
+        return res.status(400).json({ error: "Missing difficulty." });
+      }
+
+      // extract text from PDF
+      const pdfParseFn = pdfParse as unknown as (
+        data: Buffer,
+      ) => Promise<{ text: string }>;
+      const pdfData = await pdfParseFn(file.buffer);
+      const textFromPdf = pdfData.text;
+
+      if (!textFromPdf || !textFromPdf.trim()) {
+        return res
+          .status(400)
+          .json({ error: "Could not extract text from the PDF." });
+      }
+
+      const safeDiff: Difficulty = difficulty ?? "normal";
+      const safeType: QuizType = quizType ?? "short_answer";
+
+      const questions = await generateQuizFromText({
+        text: textFromPdf,
+        difficulty: safeDiff,
+        quizType: safeType,
+      });
+
+      res.json(questions);
+    } catch (err) {
+      console.error("Error in /api/quiz-from-pdf:", err);
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Failed to generate quiz from PDF";
+      res.status(500).json({ error: msg });
+    }
+  },
+);
+
+
+
 
 // -------------------------------
 // Safe Space check-in route
@@ -183,6 +286,7 @@ Return only valid JSON.
     res.status(500).json({ error: "Failed to handle check-in" });
   }
 });
+
 // -------------------------------
 // Time & Priority Coach route
 // -------------------------------
@@ -298,7 +402,6 @@ Rules:
     res.status(500).json({ error: "Failed to generate plan" });
   }
 });
-
 
 app.listen(port, () => {
   console.log(`FlowSpace API listening on http://localhost:${port}`);

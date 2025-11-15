@@ -26,6 +26,7 @@ export type SavedQuizSet = {
   title: string;
   createdAt: string;
   difficulty: "chill" | "normal" | "spicy";
+  tags?: string[];          // 👈 new
   questions: QuizQuestion[];
 };
 
@@ -252,23 +253,25 @@ function App() {
             </PageShell>
           }
         />
-        <Route
-          path="/quiz"
-          element={
-            <PageShell title="Quick Quiz">
-              <QuickQuiz
-                theme={theme}
-                onSaveQuizSet={(set) =>
-                  saveQuizSet({
-                    title: set.title,
-                    difficulty: set.difficulty,
-                    questions: set.questions,
-                  })
-                }
-              />
-            </PageShell>
-          }
-        />
+       <Route
+  path="/quiz"
+  element={
+    <PageShell title="Quick Quiz">
+      <QuickQuiz
+        theme={theme}
+        onSaveQuizSet={(set) =>
+          saveQuizSet({
+            title: set.title,
+            difficulty: set.difficulty,
+            tags: set.tags,          // 👈 new
+            questions: set.questions,
+          })
+        }
+      />
+    </PageShell>
+  }
+/>
+
         <Route
           path="/safe-space"
           element={

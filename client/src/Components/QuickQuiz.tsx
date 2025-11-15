@@ -4,63 +4,63 @@ import { API_BASE_URL } from "../config";
 import type { Theme, QuizQuestion } from "../App";
 
 type Difficulty = "chill" | "normal" | "spicy";
+type QuizType = "short_answer" | "multiple_choice" | "mixed";
 
 type QuizApiError = {
   error?: string;
 };
-
-type QuizType = "short_answer" | "multiple_choice" | "mixed";
 
 type QuickQuizProps = {
   theme: Theme;
   onSaveQuizSet?: (set: {
     title: string;
     difficulty: Difficulty;
+    tags?: string[];
     questions: QuizQuestion[];
   }) => void;
 };
 
+type ViewMode = "practice" | "review";
+
 export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
   const isDark = theme === "dark";
 
+  // input mode: notes or (future) PDF
   const [inputMode, setInputMode] = useState<"notes" | "pdf">("notes");
+
   const [text, setText] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   const [title, setTitle] = useState("");
+  const [tagsInput, setTagsInput] = useState(""); // comma-separated tags
+
   const [difficulty, setDifficulty] = useState<Difficulty>("chill");
   const [quizType, setQuizType] = useState<QuizType>("short_answer");
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  // results & practice
+  const [viewMode, setViewMode] = useState<ViewMode>("review");
+  const [openIndex, setOpenIndex] = useState<number | null>(null); // for review mode
+  const [questionStatuses, setQuestionStatuses] = useState<
+    Record<number, "got_it" | "not_yet" | undefined>
+  >({});
+  const [notesByIndex, setNotesByIndex] = useState<Record<number, string>>({});
+
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      setPdfFile(null);
-      return;
-    }
-
-    if (file.type !== "application/pdf") {
-      setError("Please upload a PDF file.");
-      setPdfFile(null);
-      return;
-    }
-
-    setError(null);
+    const file = e.target.files?.[0] || null;
     setPdfFile(file);
   };
 
   const handleGenerate = async () => {
-    // basic validation
     if (inputMode === "notes" && !text.trim()) {
       setError("Paste a few notes first.");
       return;
     }
-
     if (inputMode === "pdf" && !pdfFile) {
       setError("Choose a PDF file first.");
       return;
@@ -71,12 +71,13 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
     setQuestions([]);
     setOpenIndex(null);
     setSaveMessage(null);
+    setQuestionStatuses({});
+    setNotesByIndex({});
 
     try {
       let json: QuizQuestion[] | QuizApiError;
 
       if (inputMode === "notes") {
-        // existing JSON endpoint, now with quizType
         const res = await fetch(`${API_BASE_URL}/api/quiz`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -93,9 +94,9 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
           throw new Error(message);
         }
       } else {
-        // new PDF endpoint using FormData
+        // expects /api/quiz-from-pdf to exist (if you’ve added it)
         const formData = new FormData();
-        formData.append("file", pdfFile as Blob);
+        if (pdfFile) formData.append("file", pdfFile);
         formData.append("difficulty", difficulty);
         formData.append("quizType", quizType);
 
@@ -117,7 +118,7 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
 
       setQuestions(json);
 
-      // auto-suggest title if empty
+      // auto-suggest title if blank
       if (!title.trim()) {
         if (inputMode === "notes") {
           const snippet = text.trim().split(/\s+/).slice(0, 5).join(" ");
@@ -137,17 +138,57 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
     }
   };
 
+  // Shuffle current questions
+  const handleShuffle = () => {
+    if (questions.length === 0) return;
+    const shuffled = [...questions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    setQuestions(shuffled);
+    setOpenIndex(null);
+    setQuestionStatuses({});
+    setNotesByIndex({});
+  };
+
+  // Regenerate similar questions (just re-run generate with same inputs)
+  const handleRegenerate = () => {
+    if (inputMode === "notes" && !text.trim()) return;
+    if (inputMode === "pdf" && !pdfFile) return;
+    handleGenerate();
+  };
+
   const handleSave = () => {
     if (questions.length === 0 || !onSaveQuizSet) return;
 
     const finalTitle = title.trim() || "Untitled quiz";
+    const tags =
+      tagsInput
+        .split(",")
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0) || [];
+
     onSaveQuizSet({
       title: finalTitle,
       difficulty,
+      tags,
       questions,
     });
+
     setSaveMessage("Saved to your profile ✨");
     setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  const handleSetStatus = (
+    index: number,
+    status: "got_it" | "not_yet",
+  ) => {
+    setQuestionStatuses((prev) => ({ ...prev, [index]: status }));
+  };
+
+  const handleNoteChange = (index: number, value: string) => {
+    setNotesByIndex((prev) => ({ ...prev, [index]: value }));
   };
 
   const fieldBaseStyles = {
@@ -164,9 +205,16 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
     boxSizing: "border-box" as const,
   };
 
+  const difficultyLabel =
+    difficulty === "chill"
+      ? "★ Chill"
+      : difficulty === "normal"
+      ? "★★ Normal"
+      : "★★★ Spicy";
+
   return (
     <div>
-      <h3 style={{ marginTop: 0, marginBottom: "0.4rem" }}>Quick Quiz Mode</h3>
+      <h3 style={{ marginTop: 0, marginBottom: "0.4rem" }}>Quick Quiz Lab</h3>
       <p
         style={{
           marginTop: 0,
@@ -175,12 +223,11 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
           fontSize: "0.95rem",
         }}
       >
-        Paste a paragraph, drop in a PDF, or bring your messy notes — get gentle
-        practice questions back. You can save sets to your profile as mini
-        flashcards.
+        Turn notes or PDFs into tiny practice sets. Choose your vibe, then use
+        practice mode to mark “Got it” / “Not yet” before you peek at answers.
       </p>
 
-      {/* input mode toggle */}
+      {/* Input mode toggle */}
       <div
         style={{
           display: "flex",
@@ -226,18 +273,41 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
         </button>
       </div>
 
-      <label
-        style={{ display: "block", fontSize: "0.9rem", marginBottom: "0.75rem" }}
+      {/* Title + tags */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 3fr) minmax(0, 2fr)",
+          gap: "0.75rem",
+          marginBottom: "0.75rem",
+        }}
       >
-        Quiz title (optional)
-        <input
-          style={fieldBaseStyles}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. Geo lab streams, Calc derivatives review…"
-        />
-      </label>
+        <label
+          style={{ display: "block", fontSize: "0.9rem", marginBottom: "0.15rem" }}
+        >
+          Quiz title (optional)
+          <input
+            style={fieldBaseStyles}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Bio 101 – Cell structure review"
+          />
+        </label>
 
+        <label
+          style={{ display: "block", fontSize: "0.9rem", marginBottom: "0.15rem" }}
+        >
+          Tags (optional)
+          <input
+            style={fieldBaseStyles}
+            value={tagsInput}
+            onChange={(e) => setTagsInput(e.target.value)}
+            placeholder="e.g. Midterm 1, Chapter 3, Lecture 5"
+          />
+        </label>
+      </div>
+
+      {/* Input area */}
       {inputMode === "notes" ? (
         <label style={{ display: "block", fontSize: "0.9rem" }}>
           Your notes or concept
@@ -275,6 +345,7 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
         </label>
       )}
 
+      {/* Controls: difficulty, type, generate/save */}
       <div
         style={{
           marginTop: "1rem",
@@ -285,7 +356,6 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
           fontSize: "0.9rem",
         }}
       >
-        {/* Difficulty */}
         <div style={{ flex: "0 0 160px" }}>
           <label>
             Difficulty
@@ -301,7 +371,6 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
           </label>
         </div>
 
-        {/* Quiz type */}
         <div style={{ flex: "0 0 190px" }}>
           <label>
             Quiz type
@@ -377,11 +446,126 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
         </p>
       )}
 
+      {/* If we have questions, show practice/review controls and list */}
       {questions.length > 0 && (
         <div style={{ marginTop: "1.5rem" }}>
+          {/* top bar: mode, difficulty pill, shuffle/regenerate */}
+          <div
+            style={{
+              marginBottom: "0.6rem",
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                gap: "0.4rem",
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "0.8rem",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                  opacity: 0.8,
+                }}
+              >
+                Mode:
+              </span>
+              <button
+                type="button"
+                onClick={() => setViewMode("practice")}
+                style={{
+                  padding: "0.25rem 0.8rem",
+                  borderRadius: "999px",
+                  border:
+                    viewMode === "practice"
+                      ? "1px solid transparent"
+                      : "1px solid rgba(148,163,184,0.6)",
+                  backgroundColor:
+                    viewMode === "practice" ? "var(--accent-soft)" : "transparent",
+                  fontSize: "0.8rem",
+                }}
+              >
+                Practice first
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("review")}
+                style={{
+                  padding: "0.25rem 0.8rem",
+                  borderRadius: "999px",
+                  border:
+                    viewMode === "review"
+                      ? "1px solid transparent"
+                      : "1px solid rgba(148,163,184,0.6)",
+                  backgroundColor:
+                    viewMode === "review" ? "var(--accent-soft)" : "transparent",
+                  fontSize: "0.8rem",
+                }}
+              >
+                Review answers
+              </button>
+
+              <span
+                style={{
+                  marginLeft: "0.4rem",
+                  padding: "0.15rem 0.6rem",
+                  borderRadius: "999px",
+                  fontSize: "0.75rem",
+                  backgroundColor: "var(--accent-soft)",
+                }}
+              >
+                {difficultyLabel}
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "0.4rem",
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleShuffle}
+                style={{
+                  padding: "0.25rem 0.7rem",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(148,163,184,0.6)",
+                  backgroundColor: "transparent",
+                  fontSize: "0.8rem",
+                }}
+              >
+                Shuffle
+              </button>
+              <button
+                type="button"
+                onClick={handleRegenerate}
+                style={{
+                  padding: "0.25rem 0.7rem",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(148,163,184,0.6)",
+                  backgroundColor: "transparent",
+                  fontSize: "0.8rem",
+                }}
+              >
+                Regenerate similar
+              </button>
+            </div>
+          </div>
+
           <h4 style={{ marginBottom: "0.6rem" }}>
             Your practice questions ({questions.length})
           </h4>
+
           <ul
             style={{
               listStyle: "none",
@@ -394,6 +578,9 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
           >
             {questions.map((q, index) => {
               const isOpen = openIndex === index;
+              const status = questionStatuses[index];
+              const note = notesByIndex[index] ?? "";
+
               return (
                 <li
                   key={index}
@@ -424,22 +611,68 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
                     >
                       {q.q}
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => setOpenIndex(isOpen ? null : index)}
-                      style={{
-                        padding: "0.3rem 0.9rem",
-                        borderRadius: "999px",
-                        border: "none",
-                        backgroundColor: "var(--accent-soft)",
-                        fontSize: "0.8rem",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {isOpen ? "Hide answer" : "Show answer"}
-                    </button>
+
+                    {viewMode === "review" ? (
+                      <button
+                        type="button"
+                        onClick={() => setOpenIndex(isOpen ? null : index)}
+                        style={{
+                          padding: "0.3rem 0.9rem",
+                          borderRadius: "999px",
+                          border: "none",
+                          backgroundColor: "var(--accent-soft)",
+                          fontSize: "0.8rem",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {isOpen ? "Hide answer" : "Show answer"}
+                      </button>
+                    ) : (
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "0.3rem",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => handleSetStatus(index, "got_it")}
+                          style={{
+                            padding: "0.25rem 0.7rem",
+                            borderRadius: "999px",
+                            border: "none",
+                            fontSize: "0.8rem",
+                            backgroundColor:
+                              status === "got_it"
+                                ? "var(--accent-soft)"
+                                : "rgba(34,197,94,0.08)",
+                          }}
+                        >
+                          Got it
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSetStatus(index, "not_yet")}
+                          style={{
+                            padding: "0.25rem 0.7rem",
+                            borderRadius: "999px",
+                            border: "none",
+                            fontSize: "0.8rem",
+                            backgroundColor:
+                              status === "not_yet"
+                                ? "var(--accent-soft)"
+                                : "rgba(248,113,113,0.10)",
+                          }}
+                        >
+                          Not yet
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  {isOpen && (
+
+                  {/* Answer section (review mode only) */}
+                  {viewMode === "review" && isOpen && (
                     <p
                       style={{
                         marginTop: "0.5rem",
@@ -451,6 +684,40 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
                       {q.a}
                     </p>
                   )}
+
+                  {/* Per-question note */}
+                  <div style={{ marginTop: "0.5rem" }}>
+                    <label
+                      style={{
+                        fontSize: "0.8rem",
+                        display: "block",
+                        marginBottom: "0.2rem",
+                        opacity: 0.9,
+                      }}
+                    >
+                      Your note for this question
+                    </label>
+                    <textarea
+                      value={note}
+                      onChange={(e) =>
+                        handleNoteChange(index, e.target.value)
+                      }
+                      rows={2}
+                      placeholder="Memory hook, pattern, or reminder for future you…"
+                      style={{
+                        width: "100%",
+                        borderRadius: "10px",
+                        border: isDark
+                          ? "1px solid rgba(148,163,184,0.7)"
+                          : "1px solid rgba(148,163,184,0.5)",
+                        padding: "0.4rem 0.6rem",
+                        fontSize: "0.8rem",
+                        resize: "vertical",
+                        backgroundColor: isDark ? "#020617" : "#ffffff",
+                        color: "inherit",
+                      }}
+                    />
+                  </div>
                 </li>
               );
             })}

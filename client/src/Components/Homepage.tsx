@@ -1,5 +1,5 @@
 import { FlowTimer } from "./FlowTimer";
-import { QuickQuiz } from "./QuickQuiz";
+//import { QuickQuiz } from "./QuickQuiz";
 import { SafeSpace } from "./SafeSpace";
 import { TimeCoach } from "./TimeCoach";
 
@@ -203,23 +203,6 @@ export function HomePage({ apiMessage, theme }: HomePageProps) {
           <FlowTimer theme={theme} />
         </div>
 
-        {/* Quick Quiz card */}
-        <div
-          style={{
-            borderRadius: "1.5rem",
-            padding: "1.5rem",
-            marginTop: "2rem",
-            backgroundColor: isDark
-              ? "rgba(15,17,38,0.95)"
-              : "rgba(255,255,255,0.9)",
-            boxShadow: isDark
-              ? "0 16px 40px rgba(0,0,0,0.55)"
-              : "0 16px 40px rgba(15,23,42,0.16)",
-            color: "var(--text-main)",
-          }}
-        >
-          <QuickQuiz theme={theme} />
-        </div>
 
         {/* Time & Priority Coach card */}
         <div
