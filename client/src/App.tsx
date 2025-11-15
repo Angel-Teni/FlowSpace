@@ -232,18 +232,18 @@ function App() {
         </nav>
       </header>
 
-      {/* routed pages */}
-      <Routes>
+          {/* routed pages */}
+          <Routes>
         <Route
           path="/"
           element={
             <HomePage
               apiMessage={apiMessage}
               theme={theme}
-              onToggleTheme={toggleTheme}
             />
           }
         />
+
         <Route
           path="/timer"
           element={
@@ -300,6 +300,7 @@ function App() {
         />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+
     </div>
   );
 }

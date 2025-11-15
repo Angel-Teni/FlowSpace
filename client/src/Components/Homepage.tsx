@@ -3,121 +3,34 @@ import { QuickQuiz } from "./QuickQuiz";
 import { SafeSpace } from "./SafeSpace";
 import { TimeCoach } from "./TimeCoach";
 
-
-
 type Theme = "light" | "dark";
 
 type HomePageProps = {
   apiMessage: string;
   theme: Theme;
-  onToggleTheme: () => void;
 };
 
-export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
+export function HomePage({ apiMessage, theme }: HomePageProps) {
   const isDark = theme === "dark";
 
   return (
-    <div
+    <main
       style={{
-        minHeight: "100vh",
-        background: isDark
-          ? "radial-gradient(circle at top left, rgba(88,164,176,0.05), transparent 55%), radial-gradient(circle at bottom right, rgba(176,123,172,0.20), #15172b)"
-          : "radial-gradient(circle at top left, rgba(88,164,176,0.14), transparent 55%), radial-gradient(circle at bottom right, rgba(176,123,172,0.18), transparent 55%)",
+        maxWidth: "1040px",
+        margin: "0 auto",
+        padding: "3rem 1.5rem 4rem",
       }}
     >
-      {/* top nav */}
-      <header
+      {/* hero section (no nav here) */}
+      <section
         style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          backgroundColor: "var(--nav-bg)",
-          borderBottom: "1px solid rgba(0,0,0,0.04)",
-        }}
-      >
-        <nav
-          style={{
-            maxWidth: "1040px",
-            margin: "0 auto",
-            padding: "1rem 1.5rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <div
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: "999px",
-                backgroundColor: "var(--accent)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span style={{ color: "white", fontSize: "0.9rem" }}>✶</span>
-            </div>
-            <span
-              style={{
-                fontWeight: 600,
-                fontSize: "1.1rem",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-              }}
-            >
-              FlowSpace
-            </span>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "1.25rem",
-              fontSize: "0.95rem",
-              alignItems: "center",
-            }}
-          >
-            <button style={{ background: "none", border: "none", padding: 0 }}>
-              Timer
-            </button>
-            <button style={{ background: "none", border: "none", padding: 0 }}>
-              Quiz
-            </button>
-            <button style={{ background: "none", border: "none", padding: 0 }}>
-              Safe Space
-            </button>
-
-            {/* theme toggle */}
-            <button
-              type="button"
-              className="theme-toggle"
-              onClick={onToggleTheme}
-              aria-label="Toggle dark mode"
-            >
-              <span className="theme-toggle-pill">
-                {isDark ? "🌙" : "☀️"}
-              </span>
-              <span>{isDark ? "Dark" : "Light"}</span>
-            </button>
-          </div>
-        </nav>
-      </header>
-
-      {/* hero section */}
-      <main
-        style={{
-          maxWidth: "1040px",
-          margin: "0 auto",
-          padding: "3rem 1.5rem 4rem",
           display: "grid",
           gridTemplateColumns: "minmax(0, 1.2fr) minmax(0, 1fr)",
           gap: "2.5rem",
           alignItems: "center",
         }}
       >
-        <section>
+        <div>
           <p
             style={{
               textTransform: "uppercase",
@@ -155,7 +68,14 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
             feels heavy and you need a softer way to focus, practice, and reset.
           </p>
 
-          <div style={{ marginTop: "1.8rem", display: "flex", gap: "0.75rem" }}>
+          <div
+            style={{
+              marginTop: "1.8rem",
+              display: "flex",
+              gap: "0.75rem",
+              flexWrap: "wrap",
+            }}
+          >
             <button
               style={{
                 padding: "0.7rem 1.7rem",
@@ -191,10 +111,10 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
           >
             Backend status: <strong>{apiMessage}</strong>
           </p>
-        </section>
+        </div>
 
-        {/* hero image bubble placeholder */}
-        <section style={{ display: "flex", justifyContent: "center" }}>
+        {/* hero image bubble */}
+        <div style={{ display: "flex", justifyContent: "center" }}>
           <div
             style={{
               width: 260,
@@ -216,18 +136,16 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
                 backgroundColor: "var(--bg-surface)",
               }}
             >
-              {/* later: put your hero photo or illustration here */}
+              {/* add an illustration or orbit later if you want */}
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
 
-      {/* feature row + embedded timer + quiz */}
+      {/* feature row + embedded tools */}
       <section
         style={{
-          maxWidth: "1040px",
-          margin: "0 auto 4rem",
-          padding: "0 1.5rem",
+          marginTop: "3rem",
         }}
       >
         <div
@@ -255,7 +173,7 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
           />
         </div>
 
-        {/* timer card – now dark-mode aware */}
+        {/* Timer card */}
         <div
           style={{
             borderRadius: "1.5rem",
@@ -285,7 +203,7 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
           <FlowTimer theme={theme} />
         </div>
 
-        {/* 💡 Quick Quiz card – right under the timer */}
+        {/* Quick Quiz card */}
         <div
           style={{
             borderRadius: "1.5rem",
@@ -303,7 +221,7 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
           <QuickQuiz theme={theme} />
         </div>
 
-        {/* time & priority coach card */}
+        {/* Time & Priority Coach card */}
         <div
           style={{
             borderRadius: "1.5rem",
@@ -321,8 +239,8 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
           <TimeCoach theme={theme} />
         </div>
 
-                {/* 💗 Safe Space card – under the quiz */}
-                <div
+        {/* Safe Space card */}
+        <div
           style={{
             borderRadius: "1.5rem",
             padding: "1.5rem",
@@ -338,9 +256,8 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
         >
           <SafeSpace theme={theme} />
         </div>
-
       </section>
-    </div>
+    </main>
   );
 }
 
