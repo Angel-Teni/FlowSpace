@@ -179,7 +179,7 @@ app.post(
       }
 
       // extract text from PDF
-      const pdfData = await pdfParse(file.buffer);
+      const pdfData = await pdfParse(file.buffer); //here
       const textFromPdf = pdfData.text;
 
       if (!textFromPdf || !textFromPdf.trim()) {
