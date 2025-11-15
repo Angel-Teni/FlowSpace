@@ -1,5 +1,7 @@
 // client/src/Components/QuickQuiz.tsx
 import { useState } from "react";
+import { API_BASE_URL } from "../config";
+
 
 type Theme = "light" | "dark";
 type Difficulty = "chill" | "normal" | "spicy";
@@ -39,12 +41,11 @@ export function QuickQuiz({ theme }: QuickQuizProps) {
     setOpenIndex(null);
 
     try {
-      const res = await fetch("http://localhost:3000/api/quiz", {
+      const res = await fetch(`${API_BASE_URL}/api/quiz`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, difficulty }),
       });
-
       const json = (await res.json()) as QuizQuestion[] | QuizApiError;
 
       if (!res.ok || !Array.isArray(json)) {

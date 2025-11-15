@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "./config";
 import "./App.css";
 import { HomePage } from "./Components/Homepage";
 
@@ -25,7 +26,7 @@ function App() {
 
   // existing API status effect
   useEffect(() => {
-    fetch("http://localhost:3000/")
+    fetch(`${API_BASE_URL}/`)
       .then((res) => res.text())
       .then((text) => setApiMessage(text))
       .catch(() => setApiMessage("Could not reach FlowSpace API 😢"));

@@ -1,5 +1,9 @@
 import { FlowTimer } from "./FlowTimer";
 import { QuickQuiz } from "./QuickQuiz";
+import { SafeSpace } from "./SafeSpace";
+import { TimeCoach } from "./TimeCoach";
+
+
 
 type Theme = "light" | "dark";
 
@@ -298,6 +302,43 @@ export function HomePage({ apiMessage, theme, onToggleTheme }: HomePageProps) {
         >
           <QuickQuiz theme={theme} />
         </div>
+
+        {/* time & priority coach card */}
+        <div
+          style={{
+            borderRadius: "1.5rem",
+            padding: "1.5rem",
+            marginTop: "2rem",
+            backgroundColor: isDark
+              ? "rgba(15,17,38,0.95)"
+              : "rgba(255,255,255,0.9)",
+            boxShadow: isDark
+              ? "0 16px 40px rgba(0,0,0,0.55)"
+              : "0 16px 40px rgba(15,23,42,0.16)",
+            color: "var(--text-main)",
+          }}
+        >
+          <TimeCoach theme={theme} />
+        </div>
+
+                {/* 💗 Safe Space card – under the quiz */}
+                <div
+          style={{
+            borderRadius: "1.5rem",
+            padding: "1.5rem",
+            marginTop: "2rem",
+            backgroundColor: isDark
+              ? "rgba(15,17,38,0.95)"
+              : "rgba(255,255,255,0.9)",
+            boxShadow: isDark
+              ? "0 16px 40px rgba(0,0,0,0.55)"
+              : "0 16px 40px rgba(15,23,42,0.16)",
+            color: "var(--text-main)",
+          }}
+        >
+          <SafeSpace theme={theme} />
+        </div>
+
       </section>
     </div>
   );
