@@ -1,5 +1,5 @@
 // server/src/index.ts
-import "dotenv/config";
+//import "dotenv/config";
 
 // @ts-ignore
 import express, { Request, Response } from "express";
