@@ -1,6 +1,6 @@
 // server/src/index.ts
 import "dotenv/config";
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import OpenAI from "openai";
 
@@ -15,14 +15,14 @@ const openai = new OpenAI({
 });
 
 // health check
-app.get("/", (_req, res) => {
+app.get("/", (_req: Request, res: Response) => {
   res.send("FlowSpace API running ✨");
 });
 
 // -------------------------------
 // Quick Quiz route (chat.completions version)
 // -------------------------------
-app.post("/api/quiz", async (req, res) => {
+app.post("/api/quiz", async (req: Request, res: Response) => {
   try {
     const { text, difficulty } = req.body as {
       text?: string;
@@ -105,7 +105,7 @@ Difficulty: ${safeDifficulty}
 // -------------------------------
 // Safe Space check-in route
 // -------------------------------
-app.post("/api/checkin", async (req, res) => {
+app.post("/api/checkin", async (req: Request, res: Response) => {
   try {
     const { mood, text } = req.body as {
       mood?: string;
@@ -176,7 +176,7 @@ Return only valid JSON.
 // -------------------------------
 // Time & Priority Coach route
 // -------------------------------
-app.post("/api/plan", async (req, res) => {
+app.post("/api/plan", async (req: Request, res: Response) => {
   try {
     const { tasks, totalMinutes } = req.body as {
       tasks?: { title: string; minutes?: number }[];
