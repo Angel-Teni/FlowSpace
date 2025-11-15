@@ -1,15 +1,9 @@
 // client/src/Components/QuickQuiz.tsx
 import { useState } from "react";
 import { API_BASE_URL } from "../config";
+import type { Theme, QuizQuestion } from "../App";
 
-
-type Theme = "light" | "dark";
 type Difficulty = "chill" | "normal" | "spicy";
-
-type QuizQuestion = {
-  q: string;
-  a: string;
-};
 
 type QuizApiError = {
   error?: string;
@@ -17,17 +11,25 @@ type QuizApiError = {
 
 type QuickQuizProps = {
   theme: Theme;
+  onSaveQuizSet?: (set: {
+    title: string;
+    difficulty: Difficulty;
+    questions: QuizQuestion[];
+  }) => void;
 };
 
-export function QuickQuiz({ theme }: QuickQuizProps) {
+
+export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
   const isDark = theme === "dark";
 
   const [text, setText] = useState("");
+  const [title, setTitle] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("chill");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const handleGenerate = async () => {
     if (!text.trim()) {
@@ -39,6 +41,7 @@ export function QuickQuiz({ theme }: QuickQuizProps) {
     setIsLoading(true);
     setQuestions([]);
     setOpenIndex(null);
+    setSaveMessage(null);
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/quiz`, {
@@ -46,6 +49,7 @@ export function QuickQuiz({ theme }: QuickQuizProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, difficulty }),
       });
+
       const json = (await res.json()) as QuizQuestion[] | QuizApiError;
 
       if (!res.ok || !Array.isArray(json)) {
@@ -56,8 +60,13 @@ export function QuickQuiz({ theme }: QuickQuizProps) {
         throw new Error(message);
       }
 
-      // json is now the array of questions
       setQuestions(json);
+
+      if (!title.trim()) {
+        // auto-suggest title from first few words
+        const snippet = text.trim().split(/\s+/).slice(0, 5).join(" ");
+        setTitle(snippet || "Untitled quiz");
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Could not generate quiz.");
@@ -68,6 +77,20 @@ export function QuickQuiz({ theme }: QuickQuizProps) {
       setIsLoading(false);
     }
   };
+
+  const handleSave = () => {
+    if (questions.length === 0 || !onSaveQuizSet) return;
+  
+    const finalTitle = title.trim() || "Untitled quiz";
+    onSaveQuizSet({
+      title: finalTitle,
+      difficulty,
+      questions,
+    });
+    setSaveMessage("Saved to your profile ✨");
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+  
 
   const fieldBaseStyles = {
     width: "100%",
@@ -95,8 +118,18 @@ export function QuickQuiz({ theme }: QuickQuizProps) {
         }}
       >
         Paste a paragraph or messy notes — get a few gentle practice questions
-        back, no exam vibes.
+        back, no exam vibes. You can save sets to your profile as mini flashcards.
       </p>
+
+      <label style={{ display: "block", fontSize: "0.9rem", marginBottom: "0.75rem" }}>
+        Quiz title (optional)
+        <input
+          style={fieldBaseStyles}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="e.g. Geo lab streams, Calc derivatives review…"
+        />
+      </label>
 
       <label style={{ display: "block", fontSize: "0.9rem" }}>
         Your notes or concept
@@ -155,6 +188,23 @@ export function QuickQuiz({ theme }: QuickQuizProps) {
         >
           {isLoading ? "Generating…" : "Generate quiz"}
         </button>
+
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={questions.length === 0}
+          style={{
+            padding: "0.65rem 1.4rem",
+            borderRadius: "999px",
+            border: "1px solid rgba(255,255,255,0.2)",
+            backgroundColor: "transparent",
+            color: questions.length === 0 ? "var(--text-muted)" : "var(--accent)",
+            fontWeight: 500,
+            marginTop: "1.4rem",
+          }}
+        >
+          Save this quiz
+        </button>
       </div>
 
       {error && (
@@ -166,6 +216,18 @@ export function QuickQuiz({ theme }: QuickQuizProps) {
           }}
         >
           {error}
+        </p>
+      )}
+
+      {saveMessage && (
+        <p
+          style={{
+            marginTop: "0.4rem",
+            color: "var(--accent)",
+            fontSize: "0.85rem",
+          }}
+        >
+          {saveMessage}
         </p>
       )}
 
