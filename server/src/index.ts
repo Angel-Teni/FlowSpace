@@ -10,7 +10,7 @@ import OpenAI from "openai";
 // @ts-ignore
 import multer from "multer";
 // @ts-ignore
-import pdfParse from "pdf-parse";
+const pdfParse = require("pdf-parse");
 
 declare const process: {
   env: {
@@ -179,10 +179,7 @@ app.post(
       }
 
       // extract text from PDF
-      const pdfParseFn = pdfParse as unknown as (
-        data: Buffer,
-      ) => Promise<{ text: string }>;
-      const pdfData = await pdfParseFn(file.buffer);
+      const pdfData = await pdfParse(file.buffer);
       const textFromPdf = pdfData.text;
 
       if (!textFromPdf || !textFromPdf.trim()) {
@@ -211,6 +208,7 @@ app.post(
     }
   },
 );
+
 
 
 
