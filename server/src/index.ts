@@ -3,6 +3,11 @@ import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import OpenAI from "openai";
+declare const process: {
+  env: {
+    [key: string]: string | undefined;
+  };
+};
 
 const app = express();
 const port = 3000;
