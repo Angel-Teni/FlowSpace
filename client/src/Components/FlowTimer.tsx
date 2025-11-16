@@ -31,9 +31,7 @@ export function FlowTimer({ theme }: FlowTimerProps) {
   const [isRunning, setIsRunning] = useState(false);
 
   // timer seconds
-  const [secondsLeft, setSecondsLeft] = useState(
-    LEVELS.soft.focusMinutes * 60,
-  );
+  const [secondsLeft, setSecondsLeft] = useState(LEVELS.soft.focusMinutes * 60);
 
   // tiny todo list
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -104,7 +102,7 @@ export function FlowTimer({ theme }: FlowTimerProps) {
 
   const toggleTodo = (id: string) => {
     setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
+      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
     );
   };
 
@@ -126,9 +124,7 @@ export function FlowTimer({ theme }: FlowTimerProps) {
     boxSizing: "border-box" as const,
   };
 
-  const levelMetaLabel = `${LEVELS[level].label} – ${
-    LEVELS[level].focusMinutes
-  } min focus`;
+  const levelMetaLabel = `${LEVELS[level].label} – ${LEVELS[level].focusMinutes} min focus`;
 
   return (
     <div className="time-page-shell">
@@ -193,7 +189,11 @@ export function FlowTimer({ theme }: FlowTimerProps) {
             </label>
 
             <label
-              style={{ display: "block", marginTop: "1rem", fontSize: "0.9rem" }}
+              style={{
+                display: "block",
+                marginTop: "1rem",
+                fontSize: "0.9rem",
+              }}
             >
               Lock-in level
               <select
@@ -229,7 +229,7 @@ export function FlowTimer({ theme }: FlowTimerProps) {
                   aria-hidden="true"
                   style={{
                     position: "relative",
-                    height: 7,
+                    height: 14, // ⬅️ give the bar more height
                     borderRadius: 999,
                     overflow: "hidden",
                     background: isDark
@@ -250,7 +250,7 @@ export function FlowTimer({ theme }: FlowTimerProps) {
                         : "linear-gradient(90deg, rgba(244,114,182,0.65), rgba(129,140,248,0.45))",
                     }}
                   />
-                  {/* shooting star */}
+                  {/* star timer indicator */}
                   <div
                     style={{
                       position: "absolute",
@@ -259,38 +259,18 @@ export function FlowTimer({ theme }: FlowTimerProps) {
                       transform: `translate(${progress * 100}%, -50%)`,
                       transition:
                         "transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1.0)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
                     }}
                   >
-                    <div
+                    <span
                       style={{
-                        width: 42,
-                        height: 2,
-                        borderRadius: 999,
-                        background: isDark
-                          ? "linear-gradient(90deg, rgba(15,23,42,0), rgba(244,114,182,0.95))"
-                          : "linear-gradient(90deg, rgba(15,23,42,0), rgba(236,72,153,0.95))",
-                      }}
-                    />
-                    <div
-                      style={{
-                        width: 18,
-                        height: 18,
-                        borderRadius: "999px",
-                        background:
-                          "radial-gradient(circle at 30% 30%, #ffffff, #e879f9 55%, transparent 72%)",
-                        display: "flex",
+                        fontSize: "0.9rem",
+                        display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        boxShadow:
-                          "0 0 14px rgba(244,114,182,0.9), 0 0 26px rgba(129,140,248,0.7)",
-                        fontSize: "0.75rem",
                       }}
                     >
-                      ✶
-                    </div>
+                      ⭐
+                    </span>
                   </div>
                 </div>
                 <p
@@ -515,7 +495,9 @@ export function FlowTimer({ theme }: FlowTimerProps) {
                         border: t.done
                           ? "none"
                           : "1px solid rgba(148,163,184,0.7)",
-                        backgroundColor: t.done ? "var(--accent)" : "transparent",
+                        backgroundColor: t.done
+                          ? "var(--accent)"
+                          : "transparent",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",

@@ -1,5 +1,7 @@
 // client/src/Components/Homepage.tsx
 import { Link } from "react-router-dom";
+import { FlowSpaceLogo } from "./FlowSpaceLogo";
+
 
 type Theme = "light" | "dark";
 
@@ -107,32 +109,37 @@ export function HomePage({ apiMessage }: HomePageProps) {
         </div>
 
         {/* hero image bubble */}
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <div
-            style={{
-              width: 260,
-              height: 260,
-              borderRadius: "999px",
-              background:
-                "radial-gradient(circle at 20% 20%, rgba(88,164,176,0.25), transparent 60%), radial-gradient(circle at 80% 80%, rgba(176,123,172,0.3), transparent 55%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 20px 45px rgba(15,23,42,0.35)",
-            }}
-          >
-            <div
-              style={{
-                width: 210,
-                height: 210,
-                borderRadius: "999px",
-                backgroundColor: "var(--bg-surface)",
-              }}
-            >
-              {/* you can drop an illustration in here later */}
-            </div>
-          </div>
-        </div>
+       {/* hero image bubble */}
+<div style={{ display: "flex", justifyContent: "center" }}>
+  <div
+    style={{
+      width: 260,
+      height: 260,
+      borderRadius: "999px",
+      background:
+        "radial-gradient(circle at 20% 20%, rgba(88,164,176,0.25), transparent 60%), radial-gradient(circle at 80% 80%, rgba(176,123,172,0.3), transparent 55%)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      boxShadow: "0 20px 45px rgba(15,23,42,0.35)",
+    }}
+  >
+    <div
+      style={{
+        width: 210,
+        height: 210,
+        borderRadius: "999px",
+        backgroundColor: "var(--bg-surface)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <FlowSpaceLogo />
+    </div>
+  </div>
+</div>
+
       </section>
 
       {/* feature navigation row */}
