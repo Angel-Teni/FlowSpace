@@ -76,6 +76,13 @@ html[data-theme="dark"] {
   --fs-button-border-dark: rgba(243, 244, 255, 0.6);
 }
 
+/* 👇 dark-mode style specifically for the hero "Preview tools" button */
+html[data-theme="dark"] .preview-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f3f4ff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -118,6 +125,18 @@ button:focus,
 button:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* 👇 base style for the hero "Preview tools" button */
+.preview-btn {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1e2130;
+  border: 1px solid rgba(23, 23, 56, 0.16);
+}
+
+.preview-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
 }
 
 /* ========== Layout helpers (hero / shell) ========== */
@@ -474,6 +493,7 @@ html[data-theme="dark"] .time-meta-pill {
 .time-generate-btn:disabled {
   cursor: default;
 }
+
 /* ---------- Skip link ---------- */
 
 .skip-link {
@@ -501,6 +521,26 @@ html[data-theme="dark"] .time-meta-pill {
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
 }
+/* ---------- HC toggle colors in dark mode ---------- */
+
+/* base HC pill in dark theme (when HC is off) */
+html[data-theme="dark"] .accessibility-bar button:last-child {
+  /* using African Violet as accent */
+  border-color: rgba(176, 123, 172, 0.7) !important;  /* #B07BAC */
+  color: #e9d5ff !important;
+  background: rgba(176, 123, 172, 0.16) !important;
+}
+
+/* when high-contrast is ON, make the HC pill solid + bolder */
+html[data-theme="dark"][data-high-contrast="on"]
+  .accessibility-bar
+  button:last-child {
+  background: #b07bac !important;   /* African Violet */
+  color: #0b1020 !important;        /* very dark text */
+  border-color: #f9f9f9 !important;
+  box-shadow: 0 0 0 2px rgba(249, 249, 249, 0.3) !important;
+}
+
 
 html[data-theme="dark"] .accessibility-bar {
   background: rgba(17, 24, 39, 0.95);
@@ -605,6 +645,7 @@ html[data-theme="dark"] .accessibility-bar {
     width: 100%;
     justify-content: flex-start;
   }
+
   .accessibility-bar {
     width: 100%;
     justify-content: flex-start;

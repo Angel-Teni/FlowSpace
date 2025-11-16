@@ -89,16 +89,7 @@ export function HomePage({ apiMessage }: HomePageProps) {
               </button>
             </Link>
             <Link to="/quiz">
-              <button
-                style={{
-                  padding: "0.7rem 1.7rem",
-                  borderRadius: "999px",
-                  border: "1px solid rgba(0,0,0,0.08)",
-                  backgroundColor: "rgba(255,255,255,0.85)",
-                  backdropFilter: "blur(10px)",
-                  cursor: "pointer",
-                }}
-              >
+              <button className="fs-btn-ghost preview-btn">
                 Preview tools
               </button>
             </Link>

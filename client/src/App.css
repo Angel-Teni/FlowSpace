@@ -112,8 +112,9 @@ html[data-dyslexia="on"] {
     "SF Pro Text", Avenir, Helvetica, Arial, sans-serif;
 }
 
-/* High-contrast mode (overrides current theme tokens) */
-html[data-high-contrast="on"] {
+/* High-contrast LIGHT mode */
+html[data-theme="light"][data-high-contrast="on"],
+html:not([data-theme="dark"])[data-high-contrast="on"] {
   --bg-main: #ffffff;
   --bg-surface: #ffffff;
   --text-main: #000000;
@@ -129,6 +130,25 @@ html[data-high-contrast="on"] {
   --fs-button-border-light: rgba(0, 0, 0, 0.6);
   --fs-button-border-dark: rgba(0, 0, 0, 0.7);
 }
+
+/* High-contrast DARK mode */
+html[data-theme="dark"][data-high-contrast="on"] {
+  --bg-main: #020617;      /* almost-black */
+  --bg-surface: #020617;
+  --text-main: #f9fafb;
+  --text-muted: #e5e7eb;
+  --accent: #f97316;       /* brighter accent for contrast */
+  --accent-soft: #1f2937;
+  --nav-bg: #020617;
+  --hero-circle: #111827;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.8);
+
+  --fs-card-border-light: rgba(148, 163, 184, 0.9);
+  --fs-card-border-dark: rgba(15, 23, 42, 0.9);
+  --fs-button-border-light: rgba(148, 163, 184, 0.9);
+  --fs-button-border-dark: rgba(15, 23, 42, 0.9);
+}
+
 
 /* ---------- Base document ---------- */
 
