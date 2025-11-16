@@ -233,6 +233,12 @@ Deploy the `server/` folder with:
 Update `API_BASE_URL` in `config.ts` to your deployed backend.
 
 ---
+## AI Assistance Notice
+
+FlowSpace was developed with assistance from **Cline CLI** for code scaffolding and debugging during development.  
+Additionally, AI models were used for generating documentation text, refining UI copy, and powering quiz-generation logic via API.  
+All AI-generated code and text were reviewed, edited, and validated manually by the developer.
+---
 
 ## **License**
 
