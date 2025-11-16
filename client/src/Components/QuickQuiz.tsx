@@ -211,6 +211,14 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
       ? "★★ Normal"
       : "★★★ Spicy";
 
+  // practice summary counts
+  const gotItCount = Object.values(questionStatuses).filter(
+    (v) => v === "got_it",
+  ).length;
+  const notYetCount = Object.values(questionStatuses).filter(
+    (v) => v === "not_yet",
+  ).length;
+
   return (
     <div className="quiz-page-shell">
       <div className="fs-card quiz-card">
@@ -445,6 +453,8 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
               color: "#ff9b9b",
               fontSize: "0.9rem",
             }}
+            role="status"
+            aria-live="polite"
           >
             {error}
           </p>
@@ -457,6 +467,8 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
               color: "var(--accent)",
               fontSize: "0.85rem",
             }}
+            role="status"
+            aria-live="polite"
           >
             {saveMessage}
           </p>
@@ -497,6 +509,7 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
                 <button
                   type="button"
                   onClick={() => setViewMode("practice")}
+                  aria-pressed={viewMode === "practice"}
                   style={{
                     padding: "0.25rem 0.8rem",
                     borderRadius: "999px",
@@ -517,6 +530,7 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
                 <button
                   type="button"
                   onClick={() => setViewMode("review")}
+                  aria-pressed={viewMode === "review"}
                   style={{
                     padding: "0.25rem 0.8rem",
                     borderRadius: "999px",
@@ -586,6 +600,21 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
               </div>
             </div>
 
+            {/* practice summary (screen-reader friendly) */}
+            {viewMode === "practice" && (gotItCount > 0 || notYetCount > 0) && (
+              <p
+                style={{
+                  marginBottom: "0.8rem",
+                  fontSize: "0.85rem",
+                  color: "var(--text-muted)",
+                }}
+                aria-live="polite"
+              >
+                You’ve marked {gotItCount} as “Got it” and {notYetCount} as
+                “Not yet” so far.
+              </p>
+            )}
+
             <h4 style={{ marginBottom: "0.6rem" }}>
               Your practice questions ({questions.length})
             </h4>
@@ -604,6 +633,7 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
                 const isOpen = openIndex === index;
                 const status = questionStatuses[index];
                 const note = notesByIndex[index] ?? "";
+                const answerId = `quiz-answer-${index}`;
 
                 return (
                   <li
@@ -642,6 +672,8 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
                           onClick={() =>
                             setOpenIndex(isOpen ? null : index)
                           }
+                          aria-expanded={isOpen}
+                          aria-controls={answerId}
                           style={{
                             padding: "0.3rem 0.9rem",
                             borderRadius: "999px",
@@ -667,6 +699,7 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
                             onClick={() =>
                               handleSetStatus(index, "got_it")
                             }
+                            aria-pressed={status === "got_it"}
                             style={{
                               padding: "0.25rem 0.7rem",
                               borderRadius: "999px",
@@ -686,6 +719,7 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
                             onClick={() =>
                               handleSetStatus(index, "not_yet")
                             }
+                            aria-pressed={status === "not_yet"}
                             style={{
                               padding: "0.25rem 0.7rem",
                               borderRadius: "999px",
@@ -707,6 +741,7 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
                     {/* Answer section (review mode only) */}
                     {viewMode === "review" && isOpen && (
                       <p
+                        id={answerId}
                         style={{
                           marginTop: "0.5rem",
                           marginBottom: 0,

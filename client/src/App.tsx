@@ -112,7 +112,7 @@ function App() {
     getInitialHighContrastMode,
   );
 
-  // NEW: mobile nav toggle
+  // mobile nav toggle
   const [navOpen, setNavOpen] = useState(false);
 
   const location = useLocation();
@@ -141,7 +141,7 @@ function App() {
     window.localStorage.setItem(LOCAL_STORAGE_HIGH_CONTRAST_KEY, value);
   }, [highContrast]);
 
-  // close mobile nav when route changes
+  // optional: close mobile nav when route changes
   // useEffect(() => {
   //   setNavOpen(false);
   // }, [location.pathname]);
@@ -427,7 +427,7 @@ function App() {
         <Route
           path="/timer"
           element={
-            <PageShell title="Focus Timer">
+            <PageShell title="Focus Timer" headingId="timer-heading">
               <FlowTimer theme={theme} />
             </PageShell>
           }
@@ -435,7 +435,7 @@ function App() {
         <Route
           path="/quiz"
           element={
-            <PageShell title="Quick Quiz">
+            <PageShell title="Quick Quiz" headingId="quiz-heading">
               <QuickQuiz
                 theme={theme}
                 onSaveQuizSet={(set) =>
@@ -454,7 +454,7 @@ function App() {
         <Route
           path="/safe-space"
           element={
-            <PageShell title="Safe Space">
+            <PageShell title="Safe Space" headingId="safe-heading">
               <SafeSpace theme={theme} />
             </PageShell>
           }
@@ -462,7 +462,10 @@ function App() {
         <Route
           path="/coach"
           element={
-            <PageShell title="Time & Priority Coach">
+            <PageShell
+              title="Time & Priority Coach"
+              headingId="coach-heading"
+            >
               <TimeCoach theme={theme} />
             </PageShell>
           }
@@ -470,7 +473,7 @@ function App() {
         <Route
           path="/profile"
           element={
-            <PageShell title="Your FlowSpace profile">
+            <PageShell title="Your FlowSpace profile" headingId="profile-heading">
               <ProfilePage
                 profile={profile}
                 onUpdateProfile={updateProfile}
@@ -490,20 +493,25 @@ function App() {
 
 type PageShellProps = {
   title: string;
+  headingId: string;
   children: React.ReactNode;
 };
 
-function PageShell({ title, children }: PageShellProps) {
+function PageShell({ title, headingId, children }: PageShellProps) {
   return (
     <main
       id="main-content"
+      aria-labelledby={headingId}
       style={{
         maxWidth: "1040px",
         margin: "0 auto",
         padding: "2.5rem 1.5rem 4rem",
       }}
     >
-      <h1 style={{ marginTop: 0, marginBottom: "1rem", fontSize: "1.8rem" }}>
+      <h1
+        id={headingId}
+        style={{ marginTop: 0, marginBottom: "1rem", fontSize: "1.8rem" }}
+      >
         {title}
       </h1>
       {children}

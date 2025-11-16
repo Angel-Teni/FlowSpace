@@ -63,10 +63,11 @@ export function FlowTimer({ theme }: FlowTimerProps) {
     return () => clearInterval(interval);
   }, [isRunning, mode, level]);
 
-  const minutes = Math.floor(secondsLeft / 60)
-    .toString()
-    .padStart(2, "0");
-  const seconds = (secondsLeft % 60).toString().padStart(2, "0");
+  const minutesNum = Math.floor(secondsLeft / 60);
+  const secondsNum = secondsLeft % 60;
+
+  const minutes = minutesNum.toString().padStart(2, "0");
+  const seconds = secondsNum.toString().padStart(2, "0");
 
   const handleLevelChange = (value: LockInLevel) => {
     setLevel(value);
@@ -211,7 +212,7 @@ export function FlowTimer({ theme }: FlowTimerProps) {
               </select>
             </label>
 
-            {/* shooting star progress */}
+            {/* shooting star progress (decorative) */}
             <div style={{ marginTop: "1.4rem" }}>
               <div
                 style={{
@@ -225,6 +226,7 @@ export function FlowTimer({ theme }: FlowTimerProps) {
               </div>
               <div style={{ marginTop: "0.5rem", padding: "0.5rem 0.1rem 0" }}>
                 <div
+                  aria-hidden="true"
                   style={{
                     position: "relative",
                     height: 7,
@@ -313,6 +315,7 @@ export function FlowTimer({ theme }: FlowTimerProps) {
                   letterSpacing: "0.06em",
                   color: isDark ? "#f9f9ff" : "#1f2335",
                 }}
+                aria-label={`${minutesNum} minutes ${secondsNum} seconds`}
               >
                 {minutes}:{seconds}
               </div>
@@ -322,6 +325,8 @@ export function FlowTimer({ theme }: FlowTimerProps) {
                   fontSize: "0.95rem",
                   color: "var(--text-muted)",
                 }}
+                aria-live="polite"
+                role="status"
               >
                 Mode:{" "}
                 <strong style={{ color: "var(--text-main)" }}>
