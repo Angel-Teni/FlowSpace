@@ -1,4 +1,3 @@
-// server/src/index.ts
 //import "dotenv/config";
 
 // @ts-ignore
@@ -10,7 +9,11 @@ import OpenAI from "openai";
 // @ts-ignore
 import multer from "multer";
 // @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const pdfParse = require("pdf-parse");
+
+console.log("pdfParse typeof:", typeof pdfParse);
+
 
 declare const process: {
   env: {
@@ -23,6 +26,21 @@ const port = 3000;
 
 app.use(cors());
 app.use(express.json());
+
+app.use((req, _res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// health check
+app.get("/", (_req: Request, res: Response) => {
+  res.send("FlowSpace API running ✨");
+});
+
+app.get("/api/health", (_req: Request, res: Response) => {
+  res.json({ status: "ok" });
+});
+
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -121,6 +139,10 @@ Quiz type: ${safeQuizType}
 app.get("/", (_req: Request, res: Response) => {
   res.send("FlowSpace API running ✨");
 });
+// health check for frontend
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
 
 // -------------------------------
 // Quick Quiz route (notes-based)
@@ -178,8 +200,19 @@ app.post(
         return res.status(400).json({ error: "Missing difficulty." });
       }
 
-      // extract text from PDF
-      const pdfData = await pdfParse(file.buffer); //here
+      // 🔍 extract text from PDF
+      const pdfModule: any = pdfParse;
+      const pdfFn =
+        typeof pdfModule === "function" ? pdfModule : pdfModule.default;
+
+      if (typeof pdfFn !== "function") {
+        console.error("pdf-parse function not found on module:", pdfModule);
+        return res
+          .status(500)
+          .json({ error: "PDF parser is not available on the server." });
+      }
+
+      const pdfData = await pdfFn(file.buffer);
       const textFromPdf = pdfData.text;
 
       if (!textFromPdf || !textFromPdf.trim()) {
@@ -208,6 +241,8 @@ app.post(
     }
   },
 );
+
+
 
 
 
