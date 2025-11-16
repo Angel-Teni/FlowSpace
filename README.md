@@ -240,7 +240,7 @@ MIT License — free for personal and academic use.
 
 ---
 
-## 🤝 **Contributions**
+##  **Contributions**
 
 Pull requests welcome!
 This project is designed for learning, design experimentation, and accessibility innovation.
