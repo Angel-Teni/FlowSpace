@@ -8,11 +8,23 @@ import cors from "cors";
 import OpenAI from "openai";
 // @ts-ignore
 import multer from "multer";
-// @ts-ignore
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pdfParse = require("pdf-parse");
 
-console.log("pdfParse typeof:", typeof pdfParse); // optional debug
+// ---- pdf-parse import (handles both CJS & ESM shapes) ----
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pdfParseModule = require("pdf-parse");
+
+type PdfParseFn = (data: Buffer) => Promise<{ text: string }>;
+
+let pdfParse: PdfParseFn;
+
+if (typeof pdfParseModule === "function") {
+  pdfParse = pdfParseModule as PdfParseFn;
+} else if (pdfParseModule && typeof pdfParseModule.default === "function") {
+  pdfParse = pdfParseModule.default as PdfParseFn;
+} else {
+  console.error("❌ pdf-parse function export not found. Module shape:", pdfParseModule);
+  throw new Error("pdf-parse could not be loaded");
+}
 
 declare const process: {
   env: {
@@ -21,7 +33,7 @@ declare const process: {
 };
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -62,6 +74,7 @@ type TaskPreference = "like" | "neutral" | "least";
 
 // ---------------------------------
 // helper: generate quiz from text
+//  (with JSON repair step)
 // ---------------------------------
 async function generateQuizFromText(params: {
   text: string;
@@ -90,8 +103,7 @@ Quiz type:
 
 Return ONLY valid JSON in this exact shape:
 [
-  { "q": "question text", "a": "short answer or correct option" },
-  ...
+  { "q": "question text", "a": "short answer or correct option" }
 ]
 
 Notes:
@@ -101,6 +113,7 @@ Difficulty: ${safeDifficulty}
 Quiz type: ${safeQuizType}
 `;
 
+  // ---------- First attempt ----------
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     temperature: 0.7,
@@ -110,32 +123,58 @@ Quiz type: ${safeQuizType}
         content:
           "You write kind, bite-sized quiz questions and always respond with valid JSON only.",
       },
-      {
-        role: "user",
-        content: userPrompt,
-      },
+      { role: "user", content: userPrompt },
     ],
   });
 
-  const content = completion.choices[0]?.message?.content;
-
+  let content = completion.choices[0]?.message?.content?.trim();
   if (!content) {
     throw new Error("Empty response from OpenAI");
   }
 
-  let parsed;
+  // Try to parse directly
   try {
-    parsed = JSON.parse(content);
+    const parsed = JSON.parse(content) as unknown;
+    if (!Array.isArray(parsed)) {
+      throw new Error("Quiz result is not an array of questions");
+    }
+    return parsed as QuizQuestion[];
   } catch (e) {
-    console.error("JSON parse error:", e, "raw content:", content);
-    throw new Error("Could not parse quiz JSON from OpenAI");
+    console.warn("⚠️ First JSON parse failed, requesting repair…", e, "raw:", content);
   }
 
-  if (!Array.isArray(parsed)) {
-    throw new Error("Quiz result is not an array of questions");
+  // ---------- JSON repair attempt ----------
+  const repair = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    temperature: 0,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a JSON repair assistant. You ONLY output valid JSON and nothing else.",
+      },
+      {
+        role: "user",
+        content: `Fix this into a valid JSON array of objects with keys "q" and "a":\n\n${content}`,
+      },
+    ],
+  });
+
+  const repairedContent = repair.choices[0]?.message?.content?.trim();
+  if (!repairedContent) {
+    throw new Error("JSON repair step returned empty output");
   }
 
-  return parsed as QuizQuestion[];
+  try {
+    const repairedParsed = JSON.parse(repairedContent) as unknown;
+    if (!Array.isArray(repairedParsed)) {
+      throw new Error("Repaired quiz result is not an array of questions");
+    }
+    return repairedParsed as QuizQuestion[];
+  } catch (e) {
+    console.error("❌ JSON repair failed:", e, "content:", repairedContent);
+    throw new Error("Could not parse quiz JSON from OpenAI (even after repair)");
+  }
 }
 
 // -------------------------------
@@ -190,7 +229,6 @@ app.post(
         return res.status(400).json({ error: "No PDF file uploaded." });
       }
 
-      // difficulty / quizType fallbacks
       const safeDiff: Difficulty = (difficulty as Difficulty) ?? "normal";
       const safeType: QuizType = (quizType as QuizType) ?? "short_answer";
 
@@ -204,7 +242,6 @@ app.post(
           .json({ error: "Could not extract text from the PDF." });
       }
 
-      // reuse your existing quiz generator
       const questions = await generateQuizFromText({
         text: textFromPdf,
         difficulty: safeDiff,
@@ -214,7 +251,9 @@ app.post(
       res.json(questions);
     } catch (err) {
       console.error("Error in /api/quiz-from-pdf:", err);
-      res.status(500).json({ error: "Failed to generate quiz from PDF" });
+      const msg =
+        err instanceof Error ? err.message : "Failed to generate quiz from PDF";
+      res.status(500).json({ error: msg });
     }
   },
 );
@@ -274,7 +313,7 @@ Return only valid JSON.
       return res.status(500).json({ error: "Empty response from OpenAI" });
     }
 
-    let parsed;
+    let parsed: unknown;
     try {
       parsed = JSON.parse(content);
     } catch (e) {
@@ -403,7 +442,7 @@ Rules:
       return res.status(500).json({ error: "Empty response from OpenAI" });
     }
 
-    let parsed;
+    let parsed: unknown;
     try {
       parsed = JSON.parse(content);
     } catch (e) {
@@ -415,10 +454,10 @@ Rules:
 
     if (
       !parsed ||
-      !parsed.do_first ||
-      !parsed.do_next ||
-      !parsed.if_time ||
-      !parsed.summary
+      !(parsed as any).do_first ||
+      !(parsed as any).do_next ||
+      !(parsed as any).if_time ||
+      !(parsed as any).summary
     ) {
       return res
         .status(500)
