@@ -13,6 +13,7 @@ type HomePageProps = {
 export function HomePage({ apiMessage }: HomePageProps) {
   return (
     <main
+      id="main-content"
       style={{
         maxWidth: "1040px",
         margin: "0 auto",

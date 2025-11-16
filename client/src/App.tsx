@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
+
 import {
   HomePage,
   FlowTimer,
@@ -10,6 +11,8 @@ import {
   TimeCoach,
   ProfilePage,
 } from "./Components";
+import { Footer } from "./Components/Footer"; // 👈 add this
+
 
 import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import { API_BASE_URL } from "./config";
@@ -485,6 +488,7 @@ function App() {
         />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <Footer />
     </div>
   );
 }
