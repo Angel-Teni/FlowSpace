@@ -171,7 +171,7 @@ Returns:
 
 ---
 
-## 📸 **Screenshots**
+##  **Screenshots**
 
 (Replace these paths with your own)
 
