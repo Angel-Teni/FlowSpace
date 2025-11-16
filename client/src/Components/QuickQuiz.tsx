@@ -420,17 +420,19 @@ export function QuickQuiz({ theme, onSaveQuizSet }: QuickQuizProps) {
           </div>
 
           <button
-            type="button"
-            onClick={handleGenerate}
-            disabled={isLoading}
-            className="fs-btn-primary quiz-generate-btn"
-            style={{
-              marginTop: "1.4rem",
-              opacity: isLoading ? 0.75 : 1,
-            }}
-          >
-            {isLoading ? "Generating…" : "Generate quiz"}
-          </button>
+  type="button"
+  onClick={handleGenerate}
+  disabled={isLoading}
+  className={`fs-btn-primary quiz-generate-btn ${
+    isLoading ? "quiz-generate-btn-loading" : ""
+  }`}
+  style={{
+    marginTop: "1.4rem",
+  }}
+>
+  {isLoading ? "Generating…" : "Generate quiz"}
+</button>
+
 
           <button
             type="button"

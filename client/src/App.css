@@ -355,6 +355,31 @@ html[data-theme="dark"] .quiz-meta-pill {
   cursor: default;
   filter: grayscale(0.2);
 }
+.quiz-generate-btn-loading {
+  position: relative;
+  /* stronger base glow while loading */
+  box-shadow: 0 0 0 0 rgba(246, 79, 89, 0.7);
+  animation: quiz-generate-pulse 1.4s ease-out infinite;
+  opacity: 0.95;
+}
+
+/* soft pulsing ring */
+@keyframes quiz-generate-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(246, 79, 89, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(246, 79, 89, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(246, 79, 89, 0);
+  }
+}
+.quiz-generate-btn-loading:hover {
+  transform: none;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); /* animation handles glow */
+}
+
 
 .quiz-save-btn {
   padding-inline: 1.4rem;

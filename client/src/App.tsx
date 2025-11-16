@@ -345,8 +345,8 @@ function App() {
               </Link>
             </div>
 
-            <div className="nav-utilities">
-              {/* theme toggle */}
+            <div className="nav-utilities accessibility-bar">
+            {/* theme toggle */}
               <button
                 type="button"
                 className="theme-toggle"

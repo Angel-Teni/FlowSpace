@@ -490,6 +490,29 @@ html[data-theme="dark"] .time-meta-pill {
   left: 1rem;
 }
 
+/* ---------- Accessibility bar in nav ---------- */
+
+.accessibility-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+html[data-theme="dark"] .accessibility-bar {
+  background: rgba(17, 24, 39, 0.95);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6);
+}
+
+.accessibility-bar button {
+  padding-inline: 0.6rem;
+  padding-block: 0.3rem;
+  font-size: 0.8rem;
+}
+
 /* ---------- Nav layout + hamburger ---------- */
 
 .nav-bar {
@@ -581,5 +604,13 @@ html[data-theme="dark"] .time-meta-pill {
   .nav-utilities {
     width: 100%;
     justify-content: flex-start;
+  }
+  .accessibility-bar {
+    width: 100%;
+    justify-content: flex-start;
+    box-shadow: none;
+    padding-left: 0;
+    padding-right: 0;
+    background: transparent;
   }
 }
