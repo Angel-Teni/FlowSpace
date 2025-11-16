@@ -12,7 +12,8 @@ import multer from "multer";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pdfParse = require("pdf-parse");
 
-console.log("pdfParse typeof:", typeof pdfParse);
+console.log("pdfParse typeof:", typeof pdfParse); // optional debug
+
 
 
 declare const process: {
@@ -180,6 +181,9 @@ app.post("/api/quiz", async (req: Request, res: Response) => {
 // -------------------------------
 // Quick Quiz route (PDF-based)
 // -------------------------------
+// -------------------------------
+// Quick Quiz route (PDF-based)
+// -------------------------------
 app.post(
   "/api/quiz-from-pdf",
   upload.single("file"),
@@ -196,24 +200,13 @@ app.post(
         return res.status(400).json({ error: "No PDF file uploaded." });
       }
 
-      if (!difficulty) {
-        return res.status(400).json({ error: "Missing difficulty." });
-      }
+      // difficulty / quizType fallbacks
+      const safeDiff: Difficulty = (difficulty as Difficulty) ?? "normal";
+      const safeType: QuizType = (quizType as QuizType) ?? "short_answer";
 
-      // 🔍 extract text from PDF
-      const pdfModule: any = pdfParse;
-      const pdfFn =
-        typeof pdfModule === "function" ? pdfModule : pdfModule.default;
-
-      if (typeof pdfFn !== "function") {
-        console.error("pdf-parse function not found on module:", pdfModule);
-        return res
-          .status(500)
-          .json({ error: "PDF parser is not available on the server." });
-      }
-
-      const pdfData = await pdfFn(file.buffer);
-      const textFromPdf = pdfData.text;
+      // 🔍 extract text from PDF with pdf-parse
+      const pdfData = await pdfParse(file.buffer);
+      const textFromPdf: string = pdfData.text;
 
       if (!textFromPdf || !textFromPdf.trim()) {
         return res
@@ -221,9 +214,7 @@ app.post(
           .json({ error: "Could not extract text from the PDF." });
       }
 
-      const safeDiff: Difficulty = difficulty ?? "normal";
-      const safeType: QuizType = quizType ?? "short_answer";
-
+      // reuse your existing quiz generator
       const questions = await generateQuizFromText({
         text: textFromPdf,
         difficulty: safeDiff,
@@ -233,14 +224,11 @@ app.post(
       res.json(questions);
     } catch (err) {
       console.error("Error in /api/quiz-from-pdf:", err);
-      const msg =
-        err instanceof Error
-          ? err.message
-          : "Failed to generate quiz from PDF";
-      res.status(500).json({ error: msg });
+      res.status(500).json({ error: "Failed to generate quiz from PDF" });
     }
   },
 );
+
 
 
 
