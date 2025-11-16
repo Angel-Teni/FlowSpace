@@ -133,7 +133,7 @@ export function ProfilePage({
         padding: "3rem 1.5rem 4rem",
       }}
     >
-      <h1
+      {/* <h1
         style={{
           marginTop: 0,
           marginBottom: "1.25rem",
@@ -142,7 +142,7 @@ export function ProfilePage({
         }}
       >
         Your FlowSpace profile
-      </h1>
+      </h1> */}
 
       <div
         style={{

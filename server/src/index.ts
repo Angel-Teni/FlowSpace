@@ -14,8 +14,6 @@ const pdfParse = require("pdf-parse");
 
 console.log("pdfParse typeof:", typeof pdfParse); // optional debug
 
-
-
 declare const process: {
   env: {
     [key: string]: string | undefined;
@@ -38,10 +36,10 @@ app.get("/", (_req: Request, res: Response) => {
   res.send("FlowSpace API running ✨");
 });
 
+// health check for frontend
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
-
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -57,6 +55,10 @@ type QuizQuestion = {
   q: string;
   a: string;
 };
+
+// time coach types
+type TaskDifficulty = "easy" | "medium" | "hard";
+type TaskPreference = "like" | "neutral" | "least";
 
 // ---------------------------------
 // helper: generate quiz from text
@@ -136,15 +138,6 @@ Quiz type: ${safeQuizType}
   return parsed as QuizQuestion[];
 }
 
-// health check
-app.get("/", (_req: Request, res: Response) => {
-  res.send("FlowSpace API running ✨");
-});
-// health check for frontend
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok" });
-});
-
 // -------------------------------
 // Quick Quiz route (notes-based)
 // -------------------------------
@@ -178,9 +171,6 @@ app.post("/api/quiz", async (req: Request, res: Response) => {
   }
 });
 
-// -------------------------------
-// Quick Quiz route (PDF-based)
-// -------------------------------
 // -------------------------------
 // Quick Quiz route (PDF-based)
 // -------------------------------
@@ -228,13 +218,6 @@ app.post(
     }
   },
 );
-
-
-
-
-
-
-
 
 // -------------------------------
 // Safe Space check-in route
@@ -314,12 +297,19 @@ Return only valid JSON.
 app.post("/api/plan", async (req: Request, res: Response) => {
   try {
     const { tasks, totalMinutes } = req.body as {
-      tasks?: { title: string; minutes?: number }[];
+      tasks?: {
+        title: string;
+        minutes?: number;
+        difficulty?: TaskDifficulty;
+        preference?: TaskPreference;
+      }[];
       totalMinutes?: number;
     };
 
     if (!tasks || tasks.length === 0) {
-      return res.status(400).json({ error: "Please provide at least one task." });
+      return res
+        .status(400)
+        .json({ error: "Please provide at least one task." });
     }
 
     const cleanedTasks = tasks
@@ -327,10 +317,14 @@ app.post("/api/plan", async (req: Request, res: Response) => {
       .map((t) => ({
         title: t.title.trim(),
         minutes: t.minutes ?? null,
+        difficulty: t.difficulty ?? "medium",
+        preference: t.preference ?? "neutral",
       }));
 
     if (cleanedTasks.length === 0) {
-      return res.status(400).json({ error: "Please provide at least one task." });
+      return res
+        .status(400)
+        .json({ error: "Please provide at least one task." });
     }
 
     const safeTotal = totalMinutes && totalMinutes > 0 ? totalMinutes : null;
@@ -340,11 +334,19 @@ You are a gentle, realistic time-management coach for a burnt-out student.
 
 They have this list of tasks and this much time today.
 
+Each task also has:
+- a difficulty (easy / medium / hard)
+- how much they like it (like / neutral / least = their least favorite)
+
 Tasks:
 ${cleanedTasks
   .map(
     (t, i) =>
-      `${i + 1}. ${t.title}${t.minutes ? ` (est: ${t.minutes} minutes)` : ""}`,
+      `${i + 1}. ${t.title}${
+        t.minutes ? ` (est: ${t.minutes} minutes)` : ""
+      }
+   - Difficulty: ${t.difficulty}
+   - Preference: ${t.preference}`,
   )
   .join("\n")}
 
@@ -353,6 +355,11 @@ Total time available today: ${
     }.
 
 Create a simple, no-shame plan, focusing on starting small.
+
+Use difficulty + preference intelligently:
+- Try to put a *small, doable slice* of hard / least-favorite tasks in "do_first" so they stop looming.
+- Mix in easier or liked tasks in "do_next" so the plan feels kind and balanced.
+- Put extra or nice-to-have items in "if_time".
 
 Return ONLY valid JSON in this exact shape:
 
@@ -366,12 +373,13 @@ Return ONLY valid JSON in this exact shape:
   "if_time": [
     { "task": "task name", "minutes": number, "reason": "short kind reason" }
   ],
-  "summary": "one short, encouraging summary of the plan (2–3 sentences)"
+  "summary": "one short, encouraging summary of the plan (2–3 sentences) that mentions how we respected their energy and least-favorite tasks"
 }
 
 Rules:
 - Keep minutes realistic and gentle, not grindy.
-- Some tasks can be broken into smaller chunks.
+- You may break tasks into smaller chunks.
+- Prioritize at most 2–3 items in "do_first".
 - Always sound kind and non-judgmental.
 - Respond with JSON only, no extra text.
 `;

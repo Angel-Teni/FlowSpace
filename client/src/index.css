@@ -1,3 +1,26 @@
+/* ---------- Global reset-ish ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Let pages control text alignment */
+#root {
+  text-align: initial;
+}
+
+/* ---------- Theme tokens & brand palette ---------- */
+
 :root {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     Avenir, Helvetica, Arial, sans-serif;
@@ -24,6 +47,11 @@
   --shadow-soft: 0 18px 40px rgba(10, 16, 40, 0.08);
   --hero-circle: #e3f0f3;
 
+  --fs-card-border-light: rgba(23, 23, 56, 0.08);
+  --fs-card-border-dark: rgba(178, 186, 214, 0.5);
+  --fs-button-border-light: rgba(23, 23, 56, 0.18);
+  --fs-button-border-dark: rgba(243, 244, 255, 0.55);
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -41,6 +69,11 @@ html[data-theme="dark"] {
   --nav-bg: #171738;
   --hero-circle: #262857;
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.6);
+
+  --fs-card-border-light: rgba(56, 63, 104, 0.7);
+  --fs-card-border-dark: rgba(178, 186, 214, 0.7);
+  --fs-button-border-light: rgba(56, 63, 104, 0.6);
+  --fs-button-border-dark: rgba(243, 244, 255, 0.6);
 }
 
 body {
@@ -87,7 +120,7 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* ========== Layout helpers matching your Figma ========== */
+/* ========== Layout helpers (hero / shell) ========== */
 
 .app-shell {
   min-height: 100vh;
@@ -107,7 +140,40 @@ button:focus-visible {
   padding: 3rem 3.5rem;
 }
 
-/* theme toggle pill in the top nav */
+/* ---------- Shared cards + outlines ---------- */
+
+/* reusable app cards */
+.fs-card {
+  border-radius: 1.5rem;
+  border: 1px solid var(--fs-card-border-light);
+  background-color: var(--bg-surface);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(10px);
+}
+
+/* Primary pill button (used in components as className="fs-btn-primary") */
+.fs-btn-primary {
+  border-radius: 999px;
+  border: 1px solid var(--fs-button-border-light);
+  box-shadow: 0 10px 26px rgba(23, 23, 56, 0.18);
+}
+
+/* Ghost / secondary pill button */
+.fs-btn-ghost {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: transparent;
+}
+
+/* Accessible focus ring for keyboard users */
+.fs-btn-primary:focus-visible,
+.fs-btn-ghost:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Theme toggle in navbar ---------- */
+
 .theme-toggle {
   border: none;
   background: transparent;
@@ -129,4 +195,391 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   background: var(--accent-soft);
+}
+
+/* ---------- Quick Quiz page ---------- */
+
+.quiz-page-shell {
+  margin-top: 1.25rem;
+  padding: 1.75rem 1.5rem 2.1rem;
+  border-radius: 1.75rem;
+  background: radial-gradient(
+    circle at top,
+    #fde7ff 0,
+    #f7f4ff 36%,
+    #f9fafb 100%
+  );
+}
+
+html[data-theme="dark"] .quiz-page-shell {
+  background: radial-gradient(
+    circle at top,
+    #15172b 0,
+    #171738 40%,
+    #15172b 100%
+  );
+}
+
+.quiz-card {
+  padding: 1.5rem 1.5rem 1.8rem;
+}
+
+.quiz-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.quiz-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: rgba(244, 114, 182, 0.18);
+  color: #a21caf;
+}
+
+html[data-theme="dark"] .quiz-pill {
+  background: rgba(196, 181, 253, 0.16);
+  color: #e9d5ff;
+}
+
+.quiz-meta-pill {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: rgba(219, 234, 254, 0.9);
+  color: #1d4ed8;
+}
+
+html[data-theme="dark"] .quiz-meta-pill {
+  background: rgba(30, 64, 175, 0.55);
+  color: #e0f2fe;
+}
+
+.quiz-generate-btn {
+  padding-inline: 1.9rem;
+  padding-block: 0.75rem;
+  background-image: linear-gradient(135deg, #c471ed, #f64f59);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-color: transparent;
+  box-shadow: 0 10px 26px rgba(148, 27, 181, 0.35);
+  cursor: pointer;
+}
+
+.quiz-generate-btn:disabled {
+  cursor: default;
+  filter: grayscale(0.2);
+}
+
+.quiz-save-btn {
+  padding-inline: 1.4rem;
+  padding-block: 0.65rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--accent);
+  border-color: var(--fs-button-border-light);
+  background: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+}
+
+html[data-theme="dark"] .quiz-save-btn {
+  border-color: var(--fs-button-border-dark);
+  background: rgba(23, 24, 48, 0.98);
+  color: #f3f4ff;
+}
+
+/* ---------- Safe Space page ---------- */
+
+.safe-page-shell {
+  margin-top: 1.25rem;
+  padding: 1.75rem 1.5rem 2.1rem;
+  border-radius: 1.75rem;
+  background: radial-gradient(
+    circle at top,
+    #e0f2fe 0,
+    #eef2ff 35%,
+    #f9fafb 100%
+  );
+}
+
+html[data-theme="dark"] .safe-page-shell {
+  background: radial-gradient(
+    circle at top,
+    #15172b 0,
+    #171738 40%,
+    #15172b 100%
+  );
+}
+
+.safe-card {
+  padding: 1.5rem 1.5rem 1.8rem;
+}
+
+.safe-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.safe-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+
+html[data-theme="dark"] .safe-pill {
+  background: rgba(56, 189, 248, 0.2);
+  color: #e0f2fe;
+}
+
+.safe-meta-pill {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: rgba(239, 246, 255, 0.95);
+  color: #1e293b;
+}
+
+html[data-theme="dark"] .safe-meta-pill {
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+}
+
+.safe-checkin-btn {
+  padding-inline: 1.6rem;
+  padding-block: 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background-image: linear-gradient(135deg, #38bdf8, #4ade80);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 10px 26px rgba(56, 189, 248, 0.35);
+  cursor: pointer;
+}
+
+.safe-response-card {
+  margin-top: 1.2rem;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="dark"] .safe-response-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Time Coach page ---------- */
+
+.time-page-shell {
+  margin-top: 1.25rem;
+  padding: 1.75rem 1.5rem 2.1rem;
+  border-radius: 1.75rem;
+  background: radial-gradient(
+    circle at top,
+    #fff7ed 0,
+    #fef3c7 30%,
+    #f9fafb 100%
+  );
+}
+
+html[data-theme="dark"] .time-page-shell {
+  background: radial-gradient(
+    circle at top,
+    #15172b 0,
+    #171738 40%,
+    #15172b 100%
+  );
+}
+
+.time-card {
+  padding: 1.5rem 1.5rem 1.8rem;
+}
+
+.time-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.time-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: rgba(251, 191, 36, 0.22);
+  color: #92400e;
+}
+
+html[data-theme="dark"] .time-pill {
+  background: rgba(251, 191, 36, 0.25);
+  color: #fef3c7;
+}
+
+.time-meta-pill {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: rgba(255, 251, 235, 0.96);
+  color: #713f12;
+}
+
+html[data-theme="dark"] .time-meta-pill {
+  background: rgba(15, 23, 42, 0.9);
+  color: #fde68a;
+}
+
+.time-generate-btn {
+  margin-top: 0.3rem;
+  padding-inline: 1.7rem;
+  padding-block: 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background-image: linear-gradient(135deg, #f97316, #fb7185);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 10px 26px rgba(248, 113, 113, 0.35);
+  cursor: pointer;
+}
+
+.time-generate-btn:disabled {
+  cursor: default;
+}
+/* ---------- Skip link ---------- */
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  z-index: 20;
+}
+.skip-link:focus {
+  left: 1rem;
+}
+
+/* ---------- Nav layout + hamburger ---------- */
+
+.nav-bar {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.nav-links {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.nav-utilities {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+/* hamburger button */
+.nav-toggle {
+  display: none; /* only shown on small screens */
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  padding: 0.4rem 0.6rem;
+  background: transparent;
+  cursor: pointer;
+}
+.nav-toggle span {
+  display: block;
+  width: 16px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--text-main);
+}
+.nav-toggle span + span {
+  margin-top: 3px;
+}
+
+/* Small screens: collapse nav into hamburger */
+@media (max-width: 768px) {
+  .nav-bar {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .nav-right {
+    width: 100%;
+    margin-top: 0.5rem;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-right.nav-right-open {
+    display: flex;
+  }
+
+  .nav-links {
+    width: 100%;
+    gap: 0.4rem;
+  }
+
+  .nav-links button {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .nav-utilities {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }

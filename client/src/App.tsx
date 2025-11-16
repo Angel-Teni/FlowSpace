@@ -26,7 +26,7 @@ export type SavedQuizSet = {
   title: string;
   createdAt: string;
   difficulty: "chill" | "normal" | "spicy";
-  tags?: string[];          // 👈 new
+  tags?: string[];
   questions: QuizQuestion[];
 };
 
@@ -34,20 +34,28 @@ export type UserProfile = {
   name: string;
 };
 
+type TextSize = "small" | "medium" | "large";
+
 const LOCAL_STORAGE_PROFILE_KEY = "flowspace_profile_v1";
 const LOCAL_STORAGE_QUIZZES_KEY = "flowspace_quiz_sets_v1";
+const LOCAL_STORAGE_THEME_KEY = "flowspace_theme";
+const LOCAL_STORAGE_TEXT_SIZE_KEY = "flowspace_text_size";
+const LOCAL_STORAGE_DYSLEXIA_KEY = "flowspace_dyslexia";
+const LOCAL_STORAGE_HIGH_CONTRAST_KEY = "flowspace_high_contrast";
+
+/* ---------- Lazy initializers ---------- */
 
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") return "light";
 
-  const stored = window.localStorage.getItem("flowspace_theme");
+  const stored = window.localStorage.getItem(LOCAL_STORAGE_THEME_KEY);
   if (stored === "light" || stored === "dark") return stored;
 
-  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")
+    .matches;
   return prefersDark ? "dark" : "light";
 }
 
-// NEW: lazy initializers to avoid setState in an effect
 function getInitialProfile(): UserProfile | null {
   if (typeof window === "undefined") return null;
   try {
@@ -68,6 +76,27 @@ function getInitialQuizSets(): SavedQuizSet[] {
   }
 }
 
+function getInitialTextSize(): TextSize {
+  if (typeof window === "undefined") return "medium";
+  const stored = window.localStorage.getItem(LOCAL_STORAGE_TEXT_SIZE_KEY);
+  if (stored === "small" || stored === "medium" || stored === "large") {
+    return stored;
+  }
+  return "medium";
+}
+
+function getInitialDyslexiaMode(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(LOCAL_STORAGE_DYSLEXIA_KEY) === "on";
+}
+
+function getInitialHighContrastMode(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(LOCAL_STORAGE_HIGH_CONTRAST_KEY) === "on";
+}
+
+/* ---------- App ---------- */
+
 function App() {
   const [apiMessage, setApiMessage] = useState("Checking connection...");
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
@@ -75,19 +104,68 @@ function App() {
   const [savedQuizSets, setSavedQuizSets] = useState<SavedQuizSet[]>(
     getInitialQuizSets,
   );
+
+  const [textSize, setTextSize] = useState<TextSize>(getInitialTextSize);
+  const [dyslexiaMode, setDyslexiaMode] =
+    useState<boolean>(getInitialDyslexiaMode);
+  const [highContrast, setHighContrast] = useState<boolean>(
+    getInitialHighContrastMode,
+  );
+
+  // NEW: mobile nav toggle
+  const [navOpen, setNavOpen] = useState(false);
+
   const location = useLocation();
 
-  // theme on <html>
+  /* ---------- Theme + accessibility attributes on <html> ---------- */
+
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    window.localStorage.setItem("flowspace_theme", theme);
+    window.localStorage.setItem(LOCAL_STORAGE_THEME_KEY, theme);
   }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-text-size", textSize);
+    window.localStorage.setItem(LOCAL_STORAGE_TEXT_SIZE_KEY, textSize);
+  }, [textSize]);
+
+  useEffect(() => {
+    const value = dyslexiaMode ? "on" : "off";
+    document.documentElement.setAttribute("data-dyslexia", value);
+    window.localStorage.setItem(LOCAL_STORAGE_DYSLEXIA_KEY, value);
+  }, [dyslexiaMode]);
+
+  useEffect(() => {
+    const value = highContrast ? "on" : "off";
+    document.documentElement.setAttribute("data-high-contrast", value);
+    window.localStorage.setItem(LOCAL_STORAGE_HIGH_CONTRAST_KEY, value);
+  }, [highContrast]);
+
+  // close mobile nav when route changes
+  // useEffect(() => {
+  //   setNavOpen(false);
+  // }, [location.pathname]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  // backend health check
+  const cycleTextSize = () => {
+    setTextSize((prev) =>
+      prev === "small" ? "medium" : prev === "medium" ? "large" : "small",
+    );
+  };
+
+  const toggleDyslexia = () => {
+    setDyslexiaMode((prev) => !prev);
+  };
+
+  const toggleHighContrast = () => {
+    setHighContrast((prev) => !prev);
+  };
+
+  /* ---------- backend health check ---------- */
+
   useEffect(() => {
     fetch(`${API_BASE_URL}/`)
       .then((res) => res.text())
@@ -95,13 +173,17 @@ function App() {
       .catch(() => setApiMessage("Could not reach FlowSpace API 😢"));
   }, []);
 
-  // helpers to persist state
+  /* ---------- helpers to persist state ---------- */
+
   const updateProfile = (next: UserProfile | null) => {
     setProfile(next);
     if (!next) {
       window.localStorage.removeItem(LOCAL_STORAGE_PROFILE_KEY);
     } else {
-      window.localStorage.setItem(LOCAL_STORAGE_PROFILE_KEY, JSON.stringify(next));
+      window.localStorage.setItem(
+        LOCAL_STORAGE_PROFILE_KEY,
+        JSON.stringify(next),
+      );
     }
   };
 
@@ -113,7 +195,10 @@ function App() {
     };
     setSavedQuizSets((prev) => {
       const next = [newSet, ...prev];
-      window.localStorage.setItem(LOCAL_STORAGE_QUIZZES_KEY, JSON.stringify(next));
+      window.localStorage.setItem(
+        LOCAL_STORAGE_QUIZZES_KEY,
+        JSON.stringify(next),
+      );
       return next;
     });
   };
@@ -121,7 +206,10 @@ function App() {
   const deleteQuizSet = (id: string) => {
     setSavedQuizSets((prev) => {
       const next = prev.filter((q) => q.id !== id);
-      window.localStorage.setItem(LOCAL_STORAGE_QUIZZES_KEY, JSON.stringify(next));
+      window.localStorage.setItem(
+        LOCAL_STORAGE_QUIZZES_KEY,
+        JSON.stringify(next),
+      );
       return next;
     });
   };
@@ -129,11 +217,15 @@ function App() {
   const isDark = theme === "dark";
 
   const navLinkStyle = (path: string) => ({
-    background: location.pathname === path ? "var(--accent-soft)" : "transparent",
+    background:
+      location.pathname === path ? "var(--accent-soft)" : "transparent",
     borderRadius: "999px",
     padding: "0.25rem 0.9rem",
     border: "none",
   });
+
+  const textSizeLabel =
+    textSize === "small" ? "A-" : textSize === "medium" ? "A" : "A+";
 
   return (
     <div
@@ -144,6 +236,11 @@ function App() {
           : "radial-gradient(circle at top left, rgba(88,164,176,0.14), transparent 55%), radial-gradient(circle at bottom right, rgba(176,123,172,0.18), transparent 55%)",
       }}
     >
+      {/* Skip link for keyboard users */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
       {/* top nav (shared across pages) */}
       <header
         style={{
@@ -154,16 +251,8 @@ function App() {
           borderBottom: "1px solid rgba(0,0,0,0.04)",
         }}
       >
-        <nav
-          style={{
-            maxWidth: "1040px",
-            margin: "0 auto",
-            padding: "1rem 1.5rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
+        <nav className="nav-bar">
+          {/* Brand */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <Link
               to="/"
@@ -195,54 +284,144 @@ function App() {
             </Link>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "0.75rem",
-              fontSize: "0.95rem",
-              alignItems: "center",
-            }}
+          {/* Hamburger for small screens */}
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-label="Toggle navigation menu"
+            aria-expanded={navOpen}
+            onClick={() => setNavOpen((prev) => !prev)}
           >
-            <Link to="/timer">
-              <button style={navLinkStyle("/timer")}>Timer</button>
-            </Link>
-            <Link to="/quiz">
-              <button style={navLinkStyle("/quiz")}>Quiz</button>
-            </Link>
-            <Link to="/safe-space">
-              <button style={navLinkStyle("/safe-space")}>Safe Space</button>
-            </Link>
-            <Link to="/coach">
-              <button style={navLinkStyle("/coach")}>Time Coach</button>
-            </Link>
-            <Link to="/profile">
-              <button style={navLinkStyle("/profile")}>Profile</button>
-            </Link>
+            <span />
+            <span />
+            <span />
+          </button>
 
-            {/* theme toggle */}
-            <button
-              type="button"
-              className="theme-toggle"
-              onClick={toggleTheme}
-              aria-label="Toggle dark mode"
-            >
-              <span className="theme-toggle-pill">{isDark ? "🌙" : "☀️"}</span>
-              <span>{isDark ? "Dark" : "Light"}</span>
-            </button>
+          {/* Right side: links + accessibility */}
+          <div
+            className={`nav-right ${navOpen ? "nav-right-open" : ""}`}
+            aria-label="Main navigation"
+          >
+            <div className="nav-links">
+              <Link to="/timer">
+                <button
+                  style={navLinkStyle("/timer")}
+                  onClick={() => setNavOpen(false)}
+                >
+                  Timer
+                </button>
+              </Link>
+              <Link to="/quiz">
+                <button
+                  style={navLinkStyle("/quiz")}
+                  onClick={() => setNavOpen(false)}
+                >
+                  Quiz
+                </button>
+              </Link>
+              <Link to="/safe-space">
+                <button
+                  style={navLinkStyle("/safe-space")}
+                  onClick={() => setNavOpen(false)}
+                >
+                  Safe Space
+                </button>
+              </Link>
+              <Link to="/coach">
+                <button
+                  style={navLinkStyle("/coach")}
+                  onClick={() => setNavOpen(false)}
+                >
+                  Time Coach
+                </button>
+              </Link>
+              <Link to="/profile">
+                <button
+                  style={navLinkStyle("/profile")}
+                  onClick={() => setNavOpen(false)}
+                >
+                  Profile
+                </button>
+              </Link>
+            </div>
+
+            <div className="nav-utilities">
+              {/* theme toggle */}
+              <button
+                type="button"
+                className="theme-toggle"
+                onClick={toggleTheme}
+                aria-label="Toggle dark mode"
+              >
+                <span className="theme-toggle-pill">
+                  {isDark ? "🌙" : "☀️"}
+                </span>
+                <span>{isDark ? "Dark" : "Light"}</span>
+              </button>
+
+              {/* Text size */}
+              <button
+                type="button"
+                onClick={cycleTextSize}
+                aria-label="Cycle text size"
+                style={{
+                  padding: "0.25rem 0.7rem",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(148,163,184,0.5)",
+                  backgroundColor: "transparent",
+                  fontSize: "0.8rem",
+                }}
+              >
+                {textSizeLabel}
+              </button>
+
+              {/* Dyslexia mode */}
+              <button
+                type="button"
+                onClick={toggleDyslexia}
+                aria-pressed={dyslexiaMode}
+                aria-label="Toggle dyslexia-friendly font"
+                style={{
+                  padding: "0.25rem 0.7rem",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(148,163,184,0.5)",
+                  backgroundColor: dyslexiaMode
+                    ? "var(--accent-soft)"
+                    : "transparent",
+                  fontSize: "0.8rem",
+                }}
+              >
+                Dys
+              </button>
+
+              {/* High contrast */}
+              <button
+                type="button"
+                onClick={toggleHighContrast}
+                aria-pressed={highContrast}
+                aria-label="Toggle high contrast mode"
+                style={{
+                  padding: "0.25rem 0.7rem",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(148,163,184,0.5)",
+                  backgroundColor: highContrast
+                    ? "var(--accent-soft)"
+                    : "transparent",
+                  fontSize: "0.8rem",
+                }}
+              >
+                HC
+              </button>
+            </div>
           </div>
         </nav>
       </header>
 
-          {/* routed pages */}
-          <Routes>
+      {/* routed pages */}
+      <Routes>
         <Route
           path="/"
-          element={
-            <HomePage
-              apiMessage={apiMessage}
-              theme={theme}
-            />
-          }
+          element={<HomePage apiMessage={apiMessage} theme={theme} />}
         />
 
         <Route
@@ -253,24 +432,24 @@ function App() {
             </PageShell>
           }
         />
-       <Route
-  path="/quiz"
-  element={
-    <PageShell title="Quick Quiz">
-      <QuickQuiz
-        theme={theme}
-        onSaveQuizSet={(set) =>
-          saveQuizSet({
-            title: set.title,
-            difficulty: set.difficulty,
-            tags: set.tags,          // 👈 new
-            questions: set.questions,
-          })
-        }
-      />
-    </PageShell>
-  }
-/>
+        <Route
+          path="/quiz"
+          element={
+            <PageShell title="Quick Quiz">
+              <QuickQuiz
+                theme={theme}
+                onSaveQuizSet={(set) =>
+                  saveQuizSet({
+                    title: set.title,
+                    difficulty: set.difficulty,
+                    tags: set.tags,
+                    questions: set.questions,
+                  })
+                }
+              />
+            </PageShell>
+          }
+        />
 
         <Route
           path="/safe-space"
@@ -303,10 +482,11 @@ function App() {
         />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-
     </div>
   );
 }
+
+/* ---------- Page shell ---------- */
 
 type PageShellProps = {
   title: string;
@@ -316,6 +496,7 @@ type PageShellProps = {
 function PageShell({ title, children }: PageShellProps) {
   return (
     <main
+      id="main-content"
       style={{
         maxWidth: "1040px",
         margin: "0 auto",

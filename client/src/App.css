@@ -14,71 +14,223 @@ body,
   min-height: 100vh;
 }
 
-/* Let each page control text alignment */
+/* Let pages control text alignment */
 #root {
   text-align: initial;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Segoe UI", sans-serif;
 }
 
-/* ---------- Theme tokens ---------- */
+/* ---------- Theme tokens & brand palette ---------- */
 
 :root {
-  --accent: #c47ac0;
-  --accent-soft: rgba(196, 122, 192, 0.15);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-size: 16px;
 
-  --nav-height: 64px;
+  /* brand colors */
+  --color-seasalt: #f9f9f9;
+  --color-moonstone: #58a4b0;
+  --color-space-cadet: #171738;
+  --color-african-violet: #b07bac;
+  --color-white: #ffffff;
+
+  /* light theme (default) */
+  --bg-main: var(--color-seasalt);
+  --bg-surface: var(--color-white);
+  --text-main: #1e2130;
+  --text-muted: #5b6070;
+  --accent: var(--color-african-violet);
+  --accent-soft: #f2e6f6;
+  --nav-bg: var(--color-seasalt);
+
+  /* shared tokens */
+  --shadow-soft: 0 18px 40px rgba(10, 16, 40, 0.08);
+  --hero-circle: #e3f0f3;
+
+  --fs-card-border-light: rgba(23, 23, 56, 0.08);
+  --fs-card-border-dark: rgba(178, 186, 214, 0.5);
+  --fs-button-border-light: rgba(23, 23, 56, 0.18);
+  --fs-button-border-dark: rgba(243, 244, 255, 0.55);
+
+  /* semantic feedback colors */
+  --error-bg: #fee2e2;
+  --error-text: #b91c1c;
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Light theme */
-[data-theme="light"] {
-  --nav-bg: rgba(255, 255, 255, 0.92);
-  --bg-surface: rgba(255, 255, 255, 0.96);
-  --text-main: #111827;
-  --text-muted: #6b7280;
+/* Optional: dyslexia-friendly font (add file at /public/fonts/OpenDyslexic-Regular.woff2) */
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("/fonts/OpenDyslexic-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
 }
 
-/* Dark theme */
-[data-theme="dark"] {
-  --nav-bg: rgba(10, 12, 29, 0.96);
-  --bg-surface: rgba(15, 23, 42, 0.98);
-  --text-main: #e5e7eb;
-  --text-muted: #9ca3af;
+/* dark theme overrides when we set data-theme="dark" on <html> */
+html[data-theme="dark"] {
+  --bg-main: #15172b;
+  --bg-surface: #1f2440;
+  --text-main: #f3f4ff;
+  --text-muted: #a7add8;
+  --accent: var(--color-african-violet);
+  --accent-soft: #30224e;
+  --nav-bg: #171738;
+  --hero-circle: #262857;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.6);
+
+  --fs-card-border-light: rgba(56, 63, 104, 0.7);
+  --fs-card-border-dark: rgba(178, 186, 214, 0.7);
+  --fs-button-border-light: rgba(56, 63, 104, 0.6);
+  --fs-button-border-dark: rgba(243, 244, 255, 0.6);
+}
+
+/* ---------- Accessibility toggles (text size, dyslexia, high contrast) ---------- */
+
+/* Text size: use data-text-size on <html> */
+html[data-text-size="small"] {
+  font-size: 14px;
+}
+
+html[data-text-size="medium"] {
+  font-size: 16px;
+}
+
+html[data-text-size="large"] {
+  font-size: 18px;
+}
+
+/* Dyslexia-friendly font toggle */
+html[data-dyslexia="on"] {
+  font-family: "OpenDyslexic", system-ui, -apple-system, BlinkMacSystemFont,
+    "SF Pro Text", Avenir, Helvetica, Arial, sans-serif;
+}
+
+/* High-contrast mode (overrides current theme tokens) */
+html[data-high-contrast="on"] {
+  --bg-main: #ffffff;
+  --bg-surface: #ffffff;
+  --text-main: #000000;
+  --text-muted: #222222;
+  --accent: #171738; /* space cadet */
+  --accent-soft: #d6e4ea;
+  --nav-bg: #ffffff;
+  --hero-circle: #d3e4ea;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.35);
+
+  --fs-card-border-light: rgba(0, 0, 0, 0.2);
+  --fs-card-border-dark: rgba(0, 0, 0, 0.4);
+  --fs-button-border-light: rgba(0, 0, 0, 0.6);
+  --fs-button-border-dark: rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- Base document ---------- */
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* links */
+a {
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* base button style (can be overridden in components) */
+button {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.4em;
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--accent-soft);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.1s ease,
+    background-color 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Skip link (for keyboard / screen readers) ---------- */
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  color: var(--text-main);
+  z-index: 999;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  box-shadow: var(--shadow-soft);
+}
+
+/* ========== Layout helpers (hero / shell) ========== */
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background:
+    radial-gradient(circle at top right, var(--hero-circle), transparent 60%),
+    var(--bg-main);
+}
+
+/* main card for hero / content */
+.flow-card {
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-soft);
+  border-radius: 28px;
+  padding: 3rem 3.5rem;
 }
 
 /* ---------- Shared cards + outlines ---------- */
 
-:root {
-  --fs-card-border-light: rgba(15, 23, 42, 0.06);
-  --fs-card-border-dark: rgba(148, 163, 184, 0.28);
-  --fs-button-border-light: rgba(15, 23, 42, 0.18);
-  --fs-button-border-dark: rgba(248, 250, 252, 0.45);
-}
-
-/* Card container used on Timer/Quiz/etc. */
+/* reusable app cards */
 .fs-card {
   border-radius: 1.5rem;
   border: 1px solid var(--fs-card-border-light);
   background-color: var(--bg-surface);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(10px);
 }
 
-/* Stronger border + shadow in dark mode */
-[data-theme="dark"] .fs-card {
-  border-color: var(--fs-card-border-dark);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.55);
-}
-
-/* Primary pill button (e.g. Start session) */
+/* Primary pill button (used in components as className="fs-btn-primary") */
 .fs-btn-primary {
   border-radius: 999px;
   border: 1px solid var(--fs-button-border-light);
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.18);
-}
-
-/* Dark-mode border tweak */
-[data-theme="dark"] .fs-btn-primary {
-  border-color: var(--fs-button-border-dark);
+  box-shadow: 0 10px 26px rgba(23, 23, 56, 0.18);
 }
 
 /* Ghost / secondary pill button */
@@ -98,71 +250,26 @@ body,
 /* ---------- Theme toggle in navbar ---------- */
 
 .theme-toggle {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.25rem 0.8rem 0.25rem 0.25rem;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.55);
-  background: transparent;
+  gap: 0.5rem;
   font-size: 0.85rem;
-  cursor: pointer;
+  color: var(--text-muted);
 }
 
 .theme-toggle-pill {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent);
-}
-
-/* Focus outline for toggle */
-.theme-toggle:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* ---------- Legacy Vite styles (safe to keep or delete) ---------- */
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  background: var(--accent-soft);
 }
 
 /* ---------- Quick Quiz page ---------- */
@@ -179,20 +286,18 @@ body,
   );
 }
 
-[data-theme="dark"] .quiz-page-shell {
+html[data-theme="dark"] .quiz-page-shell {
   background: radial-gradient(
     circle at top,
-    #020617 0,
-    #020617 40%,
-    #020617 100%
+    #15172b 0,
+    #171738 40%,
+    #15172b 100%
   );
 }
 
 .quiz-card {
   padding: 1.5rem 1.5rem 1.8rem;
 }
-
-/* header / pill */
 
 .quiz-card-header {
   display: flex;
@@ -216,7 +321,7 @@ body,
   color: #a21caf;
 }
 
-[data-theme="dark"] .quiz-pill {
+html[data-theme="dark"] .quiz-pill {
   background: rgba(196, 181, 253, 0.16);
   color: #e9d5ff;
 }
@@ -229,12 +334,10 @@ body,
   color: #1d4ed8;
 }
 
-[data-theme="dark"] .quiz-meta-pill {
+html[data-theme="dark"] .quiz-meta-pill {
   background: rgba(30, 64, 175, 0.55);
   color: #e0f2fe;
 }
-
-/* main quiz action buttons */
 
 .quiz-generate-btn {
   padding-inline: 1.9rem;
@@ -246,16 +349,6 @@ body,
   border-color: transparent;
   box-shadow: 0 10px 26px rgba(148, 27, 181, 0.35);
   cursor: pointer;
-}
-
-.quiz-generate-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 32px rgba(148, 27, 181, 0.45);
-}
-
-.quiz-generate-btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 8px 20px rgba(148, 27, 181, 0.35);
 }
 
 .quiz-generate-btn:disabled {
@@ -274,14 +367,10 @@ body,
   cursor: pointer;
 }
 
-[data-theme="dark"] .quiz-save-btn {
+html[data-theme="dark"] .quiz-save-btn {
   border-color: var(--fs-button-border-dark);
-  background: rgba(15, 23, 42, 0.98);
-  color: #e5e7eb;
-}
-
-.quiz-save-btn:disabled {
-  cursor: default;
+  background: rgba(23, 24, 48, 0.98);
+  color: #f3f4ff;
 }
 
 /* ---------- Safe Space page ---------- */
@@ -298,20 +387,18 @@ body,
   );
 }
 
-[data-theme="dark"] .safe-page-shell {
+html[data-theme="dark"] .safe-page-shell {
   background: radial-gradient(
     circle at top,
-    #020617 0,
-    #020617 40%,
-    #020617 100%
+    #15172b 0,
+    #171738 40%,
+    #15172b 100%
   );
 }
 
 .safe-card {
   padding: 1.5rem 1.5rem 1.8rem;
 }
-
-/* header / pill */
 
 .safe-card-header {
   display: flex;
@@ -335,7 +422,7 @@ body,
   color: #1d4ed8;
 }
 
-[data-theme="dark"] .safe-pill {
+html[data-theme="dark"] .safe-pill {
   background: rgba(56, 189, 248, 0.2);
   color: #e0f2fe;
 }
@@ -348,12 +435,10 @@ body,
   color: #1e293b;
 }
 
-[data-theme="dark"] .safe-meta-pill {
+html[data-theme="dark"] .safe-meta-pill {
   background: rgba(15, 23, 42, 0.9);
   color: #e5e7eb;
 }
-
-/* primary action */
 
 .safe-checkin-btn {
   padding-inline: 1.6rem;
@@ -367,22 +452,6 @@ body,
   cursor: pointer;
 }
 
-.safe-checkin-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 32px rgba(56, 189, 248, 0.45);
-}
-
-.safe-checkin-btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 8px 20px rgba(56, 189, 248, 0.35);
-}
-
-.safe-checkin-btn:disabled {
-  cursor: default;
-}
-
-/* response card */
-
 .safe-response-card {
   margin-top: 1.2rem;
   padding: 0.9rem 1rem;
@@ -392,10 +461,11 @@ body,
   border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-[data-theme="dark"] .safe-response-card {
+html[data-theme="dark"] .safe-response-card {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
 /* ---------- Time Coach page ---------- */
 
 .time-page-shell {
@@ -410,12 +480,12 @@ body,
   );
 }
 
-[data-theme="dark"] .time-page-shell {
+html[data-theme="dark"] .time-page-shell {
   background: radial-gradient(
     circle at top,
-    #020617 0,
-    #020617 40%,
-    #020617 100%
+    #15172b 0,
+    #171738 40%,
+    #15172b 100%
   );
 }
 
@@ -445,7 +515,7 @@ body,
   color: #92400e;
 }
 
-[data-theme="dark"] .time-pill {
+html[data-theme="dark"] .time-pill {
   background: rgba(251, 191, 36, 0.25);
   color: #fef3c7;
 }
@@ -458,12 +528,10 @@ body,
   color: #713f12;
 }
 
-[data-theme="dark"] .time-meta-pill {
+html[data-theme="dark"] .time-meta-pill {
   background: rgba(15, 23, 42, 0.9);
   color: #fde68a;
 }
-
-/* primary action */
 
 .time-generate-btn {
   margin-top: 0.3rem;
@@ -478,16 +546,35 @@ body,
   cursor: pointer;
 }
 
-.time-generate-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 32px rgba(248, 113, 113, 0.45);
-}
-
-.time-generate-btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 8px 20px rgba(248, 113, 113, 0.35);
-}
-
 .time-generate-btn:disabled {
   cursor: default;
+}
+
+/* ---------- Responsive tweaks ---------- */
+
+@media (max-width: 768px) {
+  .quiz-page-shell,
+  .safe-page-shell,
+  .time-page-shell {
+    padding: 1.25rem 1rem 1.6rem;
+  }
+
+  .quiz-card,
+  .safe-card,
+  .time-card,
+  .flow-card {
+    padding: 1.4rem 1.2rem 1.6rem;
+    border-radius: 22px;
+  }
+}
+
+/* ---------- Reduced motion support ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

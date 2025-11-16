@@ -3,10 +3,15 @@ import { API_BASE_URL } from "../config";
 
 type Theme = "light" | "dark";
 
+type TaskDifficulty = "easy" | "medium" | "hard";
+type TaskPreference = "like" | "neutral" | "least";
+
 type TaskInput = {
   id: number;
   title: string;
   minutes?: number;
+  difficulty?: TaskDifficulty;
+  preference?: TaskPreference;
 };
 
 type PlanItem = {
@@ -30,8 +35,20 @@ export function TimeCoach({ theme }: TimeCoachProps) {
   const isDark = theme === "dark";
 
   const [tasks, setTasks] = useState<TaskInput[]>([
-    { id: 1, title: "", minutes: undefined },
-    { id: 2, title: "", minutes: undefined },
+    {
+      id: 1,
+      title: "",
+      minutes: undefined,
+      difficulty: "medium",
+      preference: "neutral",
+    },
+    {
+      id: 2,
+      title: "",
+      minutes: undefined,
+      difficulty: "medium",
+      preference: "neutral",
+    },
   ]);
   const [totalMinutes, setTotalMinutes] = useState<number | "">("");
   const [plan, setPlan] = useState<CoachPlan | null>(null);
@@ -74,10 +91,33 @@ export function TimeCoach({ theme }: TimeCoachProps) {
     );
   };
 
+  const handleTaskMetaChange = (
+    id: number,
+    field: "difficulty" | "preference",
+    value: TaskDifficulty | TaskPreference,
+  ) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              [field]: value,
+            }
+          : t,
+      ),
+    );
+  };
+
   const addTaskRow = () => {
     setTasks((prev) => [
       ...prev,
-      { id: Date.now(), title: "", minutes: undefined },
+      {
+        id: Date.now(),
+        title: "",
+        minutes: undefined,
+        difficulty: "medium",
+        preference: "neutral",
+      },
     ]);
   };
 
@@ -106,6 +146,8 @@ export function TimeCoach({ theme }: TimeCoachProps) {
           tasks: cleaned.map((t) => ({
             title: t.title,
             minutes: t.minutes && t.minutes > 0 ? t.minutes : undefined,
+            difficulty: t.difficulty ?? "medium",
+            preference: t.preference ?? "neutral",
           })),
           totalMinutes:
             typeof totalMinutes === "number" && totalMinutes > 0
@@ -280,7 +322,8 @@ export function TimeCoach({ theme }: TimeCoachProps) {
               key={task.id}
               style={{
                 display: "grid",
-                gridTemplateColumns: "minmax(0, 1.8fr) 0.7fr auto",
+                gridTemplateColumns:
+                  "minmax(0, 1.8fr) 0.7fr 1fr 1.1fr auto",
                 gap: "0.5rem",
                 alignItems: "center",
               }}
@@ -311,6 +354,46 @@ export function TimeCoach({ theme }: TimeCoachProps) {
                     }
                     placeholder="optional"
                   />
+                </label>
+              </div>
+              <div>
+                <label style={{ fontSize: "0.85rem" }}>
+                  Difficulty
+                  <select
+                    style={fieldBaseStyles}
+                    value={task.difficulty ?? "medium"}
+                    onChange={(e) =>
+                      handleTaskMetaChange(
+                        task.id,
+                        "difficulty",
+                        e.target.value as TaskDifficulty,
+                      )
+                    }
+                  >
+                    <option value="easy">🌱 Easy</option>
+                    <option value="medium">🙂 Medium</option>
+                    <option value="hard">🧠 Hard</option>
+                  </select>
+                </label>
+              </div>
+              <div>
+                <label style={{ fontSize: "0.85rem" }}>
+                  How much I like it
+                  <select
+                    style={fieldBaseStyles}
+                    value={task.preference ?? "neutral"}
+                    onChange={(e) =>
+                      handleTaskMetaChange(
+                        task.id,
+                        "preference",
+                        e.target.value as TaskPreference,
+                      )
+                    }
+                  >
+                    <option value="like">💖 I like this</option>
+                    <option value="neutral">😌 It&apos;s fine</option>
+                    <option value="least">🙃 My least favorite</option>
+                  </select>
                 </label>
               </div>
               <button
