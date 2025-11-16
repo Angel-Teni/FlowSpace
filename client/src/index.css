@@ -52,6 +52,11 @@ body,
   --fs-button-border-light: rgba(23, 23, 56, 0.18);
   --fs-button-border-dark: rgba(243, 244, 255, 0.55);
 
+  /* progress bar styles */
+  --progress-bg: linear-gradient(90deg, #e5e7eb, #f3f4f6);
+  --progress-glow: linear-gradient(90deg, rgba(244, 114, 182, 0.65), rgba(129, 140, 248, 0.45));
+  --timer-text: #1f2335;
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -74,6 +79,10 @@ html[data-theme="dark"] {
   --fs-card-border-dark: rgba(178, 186, 214, 0.7);
   --fs-button-border-light: rgba(56, 63, 104, 0.6);
   --fs-button-border-dark: rgba(243, 244, 255, 0.6);
+
+  --progress-bg: linear-gradient(90deg, #020617, #0b1220);
+  --progress-glow: linear-gradient(90deg, rgba(244, 114, 182, 0.65), rgba(129, 140, 248, 0.55));
+  --timer-text: #f9f9ff;
 }
 
 /* 👇 dark-mode style specifically for the hero "Preview tools" button */
@@ -541,6 +550,12 @@ html[data-theme="dark"][data-high-contrast="on"]
   box-shadow: 0 0 0 2px rgba(249, 249, 249, 0.3) !important;
 }
 
+
+/* High-contrast overrides - originally in App.css but ensuring cascading */
+html[data-theme="dark"][data-high-contrast="on"] {
+  --progress-glow: linear-gradient(90deg, rgba(244, 114, 182, 0.85), rgba(129, 140, 248, 0.7));
+  --timer-text: #f9fafb;
+}
 
 html[data-theme="dark"] .accessibility-bar {
   background: rgba(17, 24, 39, 0.95);

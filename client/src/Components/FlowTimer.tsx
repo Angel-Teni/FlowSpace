@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useIsMobile } from "../useScreenWidth";
 
 type LockInLevel = "soft" | "focus" | "deep";
 type Theme = "light" | "dark";
@@ -24,6 +25,7 @@ const LEVELS: Record<
 
 export function FlowTimer({ theme }: FlowTimerProps) {
   const isDark = theme === "dark";
+  const isMobile = useIsMobile();
 
   const [task, setTask] = useState("");
   const [level, setLevel] = useState<LockInLevel>("soft");
@@ -166,7 +168,7 @@ export function FlowTimer({ theme }: FlowTimerProps) {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)",
+            gridTemplateColumns: isMobile ? "1fr" : "minmax(0, 1.4fr) minmax(0, 1fr)",
             gap: "2rem",
           }}
         >
@@ -229,12 +231,10 @@ export function FlowTimer({ theme }: FlowTimerProps) {
                   aria-hidden="true"
                   style={{
                     position: "relative",
-                    height: 14, // ⬅️ give the bar more height
+                    height: 14, // 💡 give the bar more height
                     borderRadius: 999,
                     overflow: "hidden",
-                    background: isDark
-                      ? "linear-gradient(90deg, #020617, #0b1220)"
-                      : "linear-gradient(90deg, #e5e7eb, #f3f4f6)",
+                    background: "var(--progress-bg)",
                   }}
                 >
                   {/* filled glow */}
@@ -245,9 +245,7 @@ export function FlowTimer({ theme }: FlowTimerProps) {
                       transformOrigin: "left center",
                       transform: `scaleX(${progress})`,
                       transition: "transform 0.5s ease-out",
-                      background: isDark
-                        ? "linear-gradient(90deg, rgba(244,114,182,0.55), rgba(129,140,248,0.4))"
-                        : "linear-gradient(90deg, rgba(244,114,182,0.65), rgba(129,140,248,0.45))",
+                      background: "var(--progress-glow)",
                     }}
                   />
                   {/* star timer indicator */}
@@ -293,7 +291,7 @@ export function FlowTimer({ theme }: FlowTimerProps) {
                   fontSize: "3.2rem",
                   fontWeight: 700,
                   letterSpacing: "0.06em",
-                  color: isDark ? "#f9f9ff" : "#1f2335",
+                  color: "var(--timer-text)",
                 }}
                 aria-label={`${minutesNum} minutes ${secondsNum} seconds`}
               >

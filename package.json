@@ -3,6 +3,7 @@
     "react-router-dom": "^7.9.6"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1"
+    "@types/node": "^24.10.1",
+    "cline": "^1.0.6"
   }
 }
