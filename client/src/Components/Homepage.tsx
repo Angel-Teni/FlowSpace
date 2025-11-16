@@ -1,7 +1,5 @@
-import { FlowTimer } from "./FlowTimer";
-//import { QuickQuiz } from "./QuickQuiz";
-import { SafeSpace } from "./SafeSpace";
-import { TimeCoach } from "./TimeCoach";
+// client/src/Components/Homepage.tsx
+import { Link } from "react-router-dom";
 
 type Theme = "light" | "dark";
 
@@ -10,9 +8,7 @@ type HomePageProps = {
   theme: Theme;
 };
 
-export function HomePage({ apiMessage, theme }: HomePageProps) {
-  const isDark = theme === "dark";
-
+export function HomePage({ apiMessage }: HomePageProps) {
   return (
     <main
       style={{
@@ -21,7 +17,7 @@ export function HomePage({ apiMessage, theme }: HomePageProps) {
         padding: "3rem 1.5rem 4rem",
       }}
     >
-      {/* hero section (no nav here) */}
+      {/* hero section */}
       <section
         style={{
           display: "grid",
@@ -76,30 +72,36 @@ export function HomePage({ apiMessage, theme }: HomePageProps) {
               flexWrap: "wrap",
             }}
           >
-            <button
-              style={{
-                padding: "0.7rem 1.7rem",
-                borderRadius: "999px",
-                border: "none",
-                backgroundColor: "var(--accent)",
-                color: "white",
-                fontWeight: 600,
-                boxShadow: "0 14px 30px rgba(0,0,0,0.18)",
-              }}
-            >
-              Start a focus session
-            </button>
-            <button
-              style={{
-                padding: "0.7rem 1.7rem",
-                borderRadius: "999px",
-                border: "1px solid rgba(0,0,0,0.08)",
-                backgroundColor: "rgba(255,255,255,0.85)",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              Preview tools
-            </button>
+            <Link to="/timer">
+              <button
+                style={{
+                  padding: "0.7rem 1.7rem",
+                  borderRadius: "999px",
+                  border: "none",
+                  backgroundColor: "var(--accent)",
+                  color: "white",
+                  fontWeight: 600,
+                  boxShadow: "0 14px 30px rgba(0,0,0,0.18)",
+                  cursor: "pointer",
+                }}
+              >
+                Start a focus session
+              </button>
+            </Link>
+            <Link to="/quiz">
+              <button
+                style={{
+                  padding: "0.7rem 1.7rem",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  backgroundColor: "rgba(255,255,255,0.85)",
+                  backdropFilter: "blur(10px)",
+                  cursor: "pointer",
+                }}
+              >
+                Preview tools
+              </button>
+            </Link>
           </div>
 
           <p
@@ -136,18 +138,28 @@ export function HomePage({ apiMessage, theme }: HomePageProps) {
                 backgroundColor: "var(--bg-surface)",
               }}
             >
-              {/* add an illustration or orbit later if you want */}
+              {/* you can drop an illustration in here later */}
             </div>
           </div>
         </div>
       </section>
 
-      {/* feature row + embedded tools */}
+      {/* feature navigation row */}
       <section
         style={{
           marginTop: "3rem",
         }}
       >
+        <h2
+          style={{
+            marginTop: 0,
+            marginBottom: "1rem",
+            fontSize: "1.3rem",
+          }}
+        >
+          Choose where to start
+        </h2>
+
         <div
           style={{
             display: "grid",
@@ -160,84 +172,53 @@ export function HomePage({ apiMessage, theme }: HomePageProps) {
             title="Focus Timer"
             emoji="⏱"
             description="Adaptive focus timer with gentle lock-in levels, not grind culture."
+            to="/timer"
+            cta="Open timer"
           />
           <FeatureCard
             title="Smart Quiz"
             emoji="🧠"
-            description="Turn your messy notes into friendly practice questions with AI."
+            description="Turn your messy notes or PDFs into friendly practice questions with AI."
+            to="/quiz"
+            cta="Open quiz lab"
           />
           <FeatureCard
             title="Safe Space"
             emoji="💗"
             description="Check-ins, encouragement, and grounding prompts for burnt-out days."
+            to="/safe-space"
+            cta="Open safe space"
           />
         </div>
 
-        {/* Timer card */}
         <div
           style={{
             borderRadius: "1.5rem",
-            padding: "1.5rem",
-            backgroundColor: isDark
-              ? "rgba(15,17,38,0.95)"
-              : "rgba(255,255,255,0.9)",
-            boxShadow: isDark
-              ? "0 16px 40px rgba(0,0,0,0.55)"
-              : "0 16px 40px rgba(15,23,42,0.16)",
-            color: "var(--text-main)",
+            padding: "1.5rem 1.4rem",
+            backgroundColor: "var(--bg-surface)",
+            border: "1px solid rgba(148,163,184,0.25)",
           }}
         >
-          <h3 style={{ marginTop: 0, marginBottom: "0.5rem" }}>
-            Try a gentle session
-          </h3>
           <p
             style={{
-              marginTop: 0,
-              marginBottom: "1rem",
+              margin: 0,
+              fontSize: "0.9rem",
               color: "var(--text-muted)",
             }}
           >
-            Start small with a Soft Start lock-in level — no pressure, just
-            easing back into focus.
+            Want help deciding? Try{" "}
+            <Link
+              to="/coach"
+              style={{
+                color: "var(--accent)",
+                fontWeight: 500,
+                textDecoration: "none",
+              }}
+            >
+              Time &amp; Priority Coach
+            </Link>{" "}
+            to gently plan your next 60–90 minutes.
           </p>
-          <FlowTimer theme={theme} />
-        </div>
-
-
-        {/* Time & Priority Coach card */}
-        <div
-          style={{
-            borderRadius: "1.5rem",
-            padding: "1.5rem",
-            marginTop: "2rem",
-            backgroundColor: isDark
-              ? "rgba(15,17,38,0.95)"
-              : "rgba(255,255,255,0.9)",
-            boxShadow: isDark
-              ? "0 16px 40px rgba(0,0,0,0.55)"
-              : "0 16px 40px rgba(15,23,42,0.16)",
-            color: "var(--text-main)",
-          }}
-        >
-          <TimeCoach theme={theme} />
-        </div>
-
-        {/* Safe Space card */}
-        <div
-          style={{
-            borderRadius: "1.5rem",
-            padding: "1.5rem",
-            marginTop: "2rem",
-            backgroundColor: isDark
-              ? "rgba(15,17,38,0.95)"
-              : "rgba(255,255,255,0.9)",
-            boxShadow: isDark
-              ? "0 16px 40px rgba(0,0,0,0.55)"
-              : "0 16px 40px rgba(15,23,42,0.16)",
-            color: "var(--text-main)",
-          }}
-        >
-          <SafeSpace theme={theme} />
         </div>
       </section>
     </main>
@@ -248,9 +229,11 @@ type FeatureCardProps = {
   title: string;
   emoji: string;
   description: string;
+  to: string;
+  cta: string;
 };
 
-function FeatureCard({ title, emoji, description }: FeatureCardProps) {
+function FeatureCard({ title, emoji, description, to, cta }: FeatureCardProps) {
   return (
     <div
       style={{
@@ -258,6 +241,10 @@ function FeatureCard({ title, emoji, description }: FeatureCardProps) {
         padding: "1.2rem 1.3rem",
         backgroundColor: "var(--bg-surface)",
         boxShadow: "0 10px 26px rgba(15,23,42,0.12)",
+        border: "1px solid rgba(148,163,184,0.28)",
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.7rem",
       }}
     >
       <div
@@ -269,18 +256,48 @@ function FeatureCard({ title, emoji, description }: FeatureCardProps) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          marginBottom: "0.75rem",
           fontSize: "1.4rem",
         }}
       >
         {emoji}
       </div>
-      <h3 style={{ margin: 0, marginBottom: "0.4rem", fontSize: "1.05rem" }}>
-        {title}
-      </h3>
-      <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--text-muted)" }}>
-        {description}
-      </p>
+      <div>
+        <h3
+          style={{
+            margin: 0,
+            marginBottom: "0.2rem",
+            fontSize: "1.05rem",
+          }}
+        >
+          {title}
+        </h3>
+        <p
+          style={{
+            margin: 0,
+            fontSize: "0.9rem",
+            color: "var(--text-muted)",
+          }}
+        >
+          {description}
+        </p>
+      </div>
+      <div style={{ marginTop: "0.4rem" }}>
+        <Link to={to}>
+          <button
+            style={{
+              padding: "0.45rem 1.1rem",
+              borderRadius: "999px",
+              border: "1px solid rgba(148,163,184,0.5)",
+              backgroundColor: "transparent",
+              fontSize: "0.85rem",
+              fontWeight: 500,
+              cursor: "pointer",
+            }}
+          >
+            {cta}
+          </button>
+        </Link>
+      </div>
     </div>
   );
 }
