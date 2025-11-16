@@ -1,7 +1,5 @@
-// client/src/Components/SafeSpace.tsx
 import { useState } from "react";
 import { API_BASE_URL } from "../config";
-
 
 type Theme = "light" | "dark";
 
@@ -80,132 +78,129 @@ export function SafeSpace({ theme }: SafeSpaceProps) {
     boxSizing: "border-box" as const,
   };
 
-  return (
-    <div>
-      <h3 style={{ marginTop: 0, marginBottom: "0.4rem" }}>Safe Space</h3>
-      <p
-        style={{
-          marginTop: 0,
-          marginBottom: "1rem",
-          color: "var(--text-muted)",
-          fontSize: "0.95rem",
-        }}
-      >
-        A no-shame corner to say “this is a lot” and get one tiny, kind next
-        step. No hustle talk, just validation.
-      </p>
+  const selectedMood = MOODS.find((m) => m.id === mood);
 
-      {/* Mood chips */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "0.5rem",
-          marginBottom: "0.75rem",
-          fontSize: "0.85rem",
-        }}
-      >
-        {MOODS.map((m) => {
-          const selected = mood === m.id;
-          return (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => setMood(m.id)}
+  return (
+    <div className="safe-page-shell">
+      <div className="fs-card safe-card">
+        {/* Header */}
+        <div className="safe-card-header">
+          <div>
+            <div className="safe-pill">💗 Gentle check-in</div>
+            <h3 style={{ marginTop: "0.6rem", marginBottom: "0.25rem" }}>
+              Safe Space
+            </h3>
+            <p
               style={{
-                padding: "0.35rem 0.9rem",
-                borderRadius: "999px",
-                border: selected
-                  ? "1px solid var(--accent)"
-                  : "1px solid transparent",
-                backgroundColor: selected
-                  ? "var(--accent-soft)"
-                  : isDark
-                  ? "rgba(255,255,255,0.04)"
-                  : "rgba(0,0,0,0.03)",
-                fontSize: "0.85rem",
-                cursor: "pointer",
+                marginTop: 0,
+                marginBottom: "0.5rem",
+                color: "var(--text-muted)",
+                fontSize: "0.95rem",
               }}
             >
-              {m.label}
-            </button>
-          );
-        })}
-      </div>
+              A no-shame corner to say “this is a lot” and get one tiny, kind
+              next step. No hustle talk, just validation.
+            </p>
+          </div>
 
-      {/* Optional vent box */}
-      <label style={{ display: "block", fontSize: "0.9rem" }}>
-        Want to share what's going on?
-        <textarea
-          style={{
-            ...fieldBaseStyles,
-            marginTop: "0.5rem",
-            minHeight: "90px",
-            resize: "vertical" as const,
-          }}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Totally optional — you can vent, ramble, or just leave this blank."
-        />
-      </label>
+          <div className="safe-meta-pill">
+            {selectedMood ? selectedMood.label : "How are you landing today?"}
+          </div>
+        </div>
 
-      <button
-        type="button"
-        onClick={handleCheckIn}
-        disabled={isLoading}
-        style={{
-          marginTop: "1rem",
-          padding: "0.6rem 1.5rem",
-          borderRadius: "999px",
-          border: "none",
-          backgroundColor: "var(--accent)",
-          color: "#ffffff",
-          fontWeight: 600,
-          opacity: isLoading ? 0.7 : 1,
-          cursor: "pointer",
-        }}
-      >
-        {isLoading ? "Checking in…" : "Check in with FlowSpace"}
-      </button>
-
-      {error && (
-        <p
-          style={{
-            marginTop: "0.8rem",
-            color: "#ff9b9b",
-            fontSize: "0.9rem",
-          }}
-        >
-          {error}
-        </p>
-      )}
-
-      {response && (
+        {/* Mood chips */}
         <div
           style={{
-            marginTop: "1.2rem",
-            padding: "0.9rem 1rem",
-            borderRadius: "14px",
-            backgroundColor: isDark
-              ? "rgba(255,255,255,0.04)"
-              : "rgba(0,0,0,0.02)",
-            border: isDark
-              ? "1px solid rgba(255,255,255,0.08)"
-              : "1px solid rgba(0,0,0,0.04)",
-            fontSize: "0.9rem",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "0.5rem",
+            marginBottom: "0.75rem",
+            fontSize: "0.85rem",
           }}
         >
-          <p style={{ marginTop: 0, marginBottom: "0.6rem" }}>
-            {response.validation}
-          </p>
-          <p style={{ margin: 0, marginBottom: "0.4rem" }}>
-            <strong>Tiny next step:</strong> {response.tiny_step}
-          </p>
-          <p style={{ margin: 0, color: "var(--text-muted)" }}>
-            {response.reminder}
-          </p>
+          {MOODS.map((m) => {
+            const selected = mood === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setMood(m.id)}
+                style={{
+                  padding: "0.35rem 0.9rem",
+                  borderRadius: "999px",
+                  border: selected
+                    ? "1px solid var(--accent)"
+                    : "1px solid transparent",
+                  backgroundColor: selected
+                    ? "var(--accent-soft)"
+                    : isDark
+                    ? "rgba(255,255,255,0.04)"
+                    : "rgba(0,0,0,0.03)",
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                }}
+              >
+                {m.label}
+              </button>
+            );
+          })}
         </div>
-      )}
+
+        {/* Optional vent box */}
+        <label style={{ display: "block", fontSize: "0.9rem" }}>
+          Want to share what's going on?
+          <textarea
+            style={{
+              ...fieldBaseStyles,
+              marginTop: "0.5rem",
+              minHeight: "90px",
+              resize: "vertical" as const,
+            }}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Totally optional — you can vent, ramble, or just leave this blank."
+          />
+        </label>
+
+        <button
+          type="button"
+          onClick={handleCheckIn}
+          disabled={isLoading}
+          className="fs-btn-primary safe-checkin-btn"
+          style={{
+            marginTop: "1rem",
+            opacity: isLoading ? 0.7 : 1,
+          }}
+        >
+          {isLoading ? "Checking in…" : "Check in with FlowSpace"}
+        </button>
+
+        {error && (
+          <p
+            style={{
+              marginTop: "0.8rem",
+              color: "#ff9b9b",
+              fontSize: "0.9rem",
+            }}
+          >
+            {error}
+          </p>
+        )}
+
+        {response && (
+          <div className="safe-response-card">
+            <p style={{ marginTop: 0, marginBottom: "0.6rem" }}>
+              {response.validation}
+            </p>
+            <p style={{ margin: 0, marginBottom: "0.4rem" }}>
+              <strong>Tiny next step:</strong> {response.tiny_step}
+            </p>
+            <p style={{ margin: 0, color: "var(--text-muted)" }}>
+              {response.reminder}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
