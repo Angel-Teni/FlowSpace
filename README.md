@@ -8,33 +8,33 @@ This project was created with a strong emphasis on **accessibility, color-sensit
 
 ---
 
-## 🌟 **Features**
+##  **Features**
 
-### **🕒 Adaptive Focus Timer**
+### ** Adaptive Focus Timer**
 
 * Soft → Focus → Deep lock-in levels
 * Shooting-star animated progress bar
 * Built-in micro-task list
 * Task-based session tracking
 
-### **🧠 AI Quiz Generator**
+### ** AI Quiz Generator**
 
 * Converts PDFs, notes, or raw text into friendly practice questions
 * Supports difficulty levels: chill / normal / spicy
 * Local storage support for saved quiz sets
 
-### **💜 Safe Space**
+### ** Safe Space**
 
 * Grounding prompts
 * Affirmations and emotional regulation tools
 * Gentle UI intentionally designed for burnout-safe usage
 
-### **📅 Time & Priority Coach**
+### ** Time & Priority Coach**
 
 * Simplified decision-making tool for planning your next 60–90 minutes
 * Reduces cognitive overload
 
-### **🎨 Full Accessibility Engine**
+### ** Full Accessibility Engine**
 
 * Light / dark mode
 * High-contrast mode
@@ -46,7 +46,7 @@ This project was created with a strong emphasis on **accessibility, color-sensit
 
 ---
 
-## ⚙️ **Tech Stack**
+## **Tech Stack**
 
 ### **Frontend**
 
@@ -66,7 +66,7 @@ This project was created with a strong emphasis on **accessibility, color-sensit
 
 ---
 
-## 📂 **Project Structure**
+## **Project Structure**
 
 ```
 client/
@@ -92,7 +92,7 @@ server/
 
 ---
 
-## 🛠 **Installation & Setup**
+## **Installation & Setup**
 
 ### **1. Clone the repository**
 
@@ -140,7 +140,7 @@ export const API_BASE_URL = "http://localhost:5001";
 
 ---
 
-## 🧪 **API Endpoints**
+## **API Endpoints**
 
 ### **Health Check**
 
@@ -191,7 +191,7 @@ You can add them like:
 
 ---
 
-## 📱 **Responsive Design**
+## **Responsive Design**
 
 FlowSpace is fully responsive:
 
@@ -202,7 +202,7 @@ FlowSpace is fully responsive:
 
 ---
 
-## ♿ **Accessibility**
+## **Accessibility**
 
 FlowSpace includes a full accessibility system:
 
@@ -217,7 +217,7 @@ Controls are exposed in the navbar for fast toggling.
 
 ---
 
-## 🚀 **Deployment**
+## **Deployment**
 
 ### **Client (Vercel or Netlify)**
 
@@ -234,7 +234,7 @@ Update `API_BASE_URL` in `config.ts` to your deployed backend.
 
 ---
 
-## 📄 **License**
+## **License**
 
 MIT License — free for personal and academic use.
 
