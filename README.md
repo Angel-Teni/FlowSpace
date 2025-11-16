@@ -171,25 +171,6 @@ Returns:
 
 ---
 
-##  **Screenshots**
-
-(Replace these paths with your own)
-
-```
-/public/screenshots/home.png  
-/public/screenshots/timer.png  
-/public/screenshots/quiz.png  
-/public/screenshots/safespace.png  
-```
-
-You can add them like:
-
-```md
-![Home](public/screenshots/home.png)
-![Timer](public/screenshots/timer.png)
-```
-
----
 
 ## **Responsive Design**
 
